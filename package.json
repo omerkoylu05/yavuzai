@@ -1,0 +1,43 @@
+{
+  "name": "yavuzai",
+  "version": "1.0.0",
+  "description": "A JavaScript chessboard which is lightweight, ES6 module based, responsive, SVG rendered and without dependencies.",
+  "keywords": [
+    "chess",
+    "chessboard",
+    "SVG",
+    "ES6",
+    "ECMAScript 6",
+    "chessmail",
+    "module",
+    "widget"
+  ],
+  "browser": "./src/cm-chessboard/Chessboard.js",
+  "scripts": {
+    "test": "tput setaf 4;echo 'Run test/index.html in your browser for unit testing.'; echo ''; exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shaack/cm-chessboard.git"
+  },
+  "author": "Stefan Haack (http://www.shaack.com)",
+  "license": "UNLICENCED",
+  "bugs": {
+    "url": "https://github.com/shaack/cm-chessboard/issues"
+  },
+  "homepage": "https://github.com/shaack/cm-chessboard#readme",
+  "devDependencies": {
+    "teevi": "^2.1.9"
+  },
+  "dependencies": {
+    "chess.js": "^1.0.0-beta.6",
+    "gpu.js": "^2.16.0",
+    "jquery": "^3.7.1",
+    "nodejs": "^0.0.0"
+  },
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  }
+}

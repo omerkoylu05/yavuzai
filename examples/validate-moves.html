@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>cm-chessboard</title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0"/>
+    <link rel="stylesheet" href="styles/examples.css"/>
+    <link rel="stylesheet" href="../assets/styles/cm-chessboard.css"/>
+    <script type="module" src="../node_modules/chess.js/dist/esm/chess.js"></script>
+    <!-- <script src="https://unpkg.com/gpu.js@latest/dist/gpu-browser.min.js"></script> -->
+    <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <script type="module" src="../src/yavuz/yavuz_v2.js"></script>
+    <style type="text/css">
+        div.board {
+            float: left;
+            width: 200px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1><a href="../">YAVUZ</a></h1>
+<h2>YAVUZ Ai Training field</h2>
+<h3>Total Game Count:<span id="gameCount"></span></h3>
+<h3>Best Elo:<span id="belo"></span></h3><h3>Worst Elo:<span id="welo"></span></h3>
+<h3>tour:<span id="tour"></span></h3>
+<h3>playing:<span id="playing"></span></h3>
+<button onclick="start()">Start</button>
+<button onclick="stopTournament()">Stop</button><br />
+<!-- <div class="board" id="board"></div> -->
+<!--suppress JSUnresolvedFunction -->
+<script type="module">
+    import {INPUT_EVENT_TYPE, COLOR, Chessboard, MARKER_TYPE} from "../src/cm-chessboard/Chessboard.js"
+    import { Chess } from "../node_modules/chess.js/dist/esm/chess.js"
+
+    function inputHandler(event) {
+        console.log("event", event)
+        event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot)
+        event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
+        if (event.type === INPUT_EVENT_TYPE.moveStart) {
+            const moves = chess.moves({square: event.square, verbose: true});
+            event.chessboard.addMarker(event.square, MARKER_TYPE.square)
+            for (const move of moves) { // draw dots on possible moves
+                event.chessboard.addMarker(move.to, MARKER_TYPE.dot)
+            }
+            return moves.length > 0
+        } else if (event.type === INPUT_EVENT_TYPE.moveDone) {
+            const move = {from: event.squareFrom, to: event.squareTo}
+            const result = chess.move(move)
+            if (result) {
+                event.chessboard.disableMoveInput()
+                event.chessboard.setPosition(chess.fen())
+                const possibleMoves = chess.moves({verbose: true})
+                // if (possibleMoves.length > 0) {
+                //     const randomIndex = Math.floor(Math.random() * possibleMoves.length)
+                //     const randomMove = possibleMoves[randomIndex]
+                //     setTimeout(() => { // smoother with 500ms delay
+                //         chess.move({from: randomMove.from, to: randomMove.to})
+                //         event.chessboard.enableMoveInput(inputHandler, COLOR.white)
+                //         event.chessboard.setPosition(chess.fen())
+                //     }, 500)
+                }
+            } else {
+                console.warn("invalid move", move)
+            }
+            return result
+        }
+</script>
+<!-- <script async type="text/javascript" src="../wasm/abc.js"></script> -->
+</body>
+</html>

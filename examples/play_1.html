@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>cm-chessboard</title>
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0"/>
+    <link rel="stylesheet" href="styles/examples.css"/>
+    <link rel="stylesheet" href="../assets/styles/cm-chessboard.css"/>
+    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="../node_modules/chess.js/dist/cjs/chess.js"></script>
+    <!-- <script type="module" src="../src/yavuz/yavuz.js"></script> -->
+</head>
+<body>
+<h1><a href="../">YAVUZ ai play arena!</a></h1>
+<button id="degistir">Degistir</button>
+<button id="undo">Geri Al</button>
+<h2>Example: Input enabled, move validation with chess.js</h2>
+<p>Input enabled for white. <a href="https://github.com/jhlywa/chess.js">chess.js</a> does the validation and answers
+    with random moves.</p>
+<div class="board" id="board"></div>
+<div id="output">
+<div id="options" style="display:none">
+<img src="../assets/images/wQ.png">
+<img src="../assets/images/wR.png">
+<img src="../assets/images/wB.png">
+<img src="../assets/images/wN.png">
+</div></div>
+<!--suppress JSUnresolvedFunction -->
+<script type="module">
+import {INPUT_EVENT_TYPE, COLOR, Chessboard, MARKER_TYPE} from "../src/cm-chessboard/Chessboard.js"
+let MEMORY={};
+
+function Yavuz(idx,game,color) {
+    this.game=game;
+    // console.log(this.fen);
+    this.idx=idx;
+    this.init();
+    this.fens={};
+    this.color=color;
+    }
+    
+    Yavuz.prototype = {
+        
+        init: function () {
+            this.elo=1000;
+            this.depth=3;
+            this.columns=["1","2","3","4","5","6","7","8"]
+            this.rows=["a","b","c","d","e","f","g","h"]
+            this.types=["p","r","n","b","q","k"]
+            this.movetree=Array();
+            this.decisiontree=Array();
+            this.points={}
+            this.pointsGame={};
+            this.actualMoves=[];
+            this.additionPerMove={};
+            this.WINNER=false;
+            this.DRAW=false;
+            this.LOSER=false;
+            this.opponent=this.color=="w"?"b":"w";
+            this.checkScoreBase=Math.random();
+            this.checkScore=this.checkScoreBase;
+            this.checkMateScore=this.checkScore*2;
+            this.additionCheckScore=Math.random();
+            this.types.forEach((type)=>{
+                var cellPoints=[];
+                var valPerMoves=[]
+                for(var s=0;s<8;s++) {
+                    var rowPoints=[];
+                    var rowMovePoints=[]
+                    for (var i=0;i<8;i++) {
+                        rowPoints.push(Math.random());
+                        rowMovePoints.push(Math.random());
+                        }
+                    cellPoints.push(rowPoints);
+                    valPerMoves.push(rowMovePoints);
+                }
+                this.points[type]=cellPoints;
+                this.additionPerMove[type]=valPerMoves;
+            });
+            this.pointsGame=JSON.parse(JSON.stringify(this.points));
+            // console.log(this.points);
+            // this.pointsGame["b"][0][0]=5.0;
+            // console.log(this.points);
+            this.piecePoints={p:10,r:50,n:30,b:30,k:900,q:90};
+            this.pieceAdditionPerMove={p:Math.random(),r:Math.random(),n:Math.random(),b:Math.random(),k:Math.random(),q:Math.random()};
+            // this.gpu=new GPU();
+        },
+
+        historToPGN: function(history) {
+            let pgn="";
+            history.forEach((m,index)=>{
+                if ((index+1)%2==1) {
+                    pgn+=Math.ceil((index+1)/2).toString()+"."+m;
+                } else {
+                    pgn+=" "+m+" ";
+                }
+            });
+            return pgn;
+        },
+
+        prepareMemJSON: function (history) {
+            let memData={};
+            let g=new Chess();
+            history.forEach((m)=>{
+                memData[g.fen().substr(0,g.fen().indexOf(" "))]=m;
+                g.move(m);
+            });
+            return memData;
+        },
+
+        updateMemory: function (result) {
+            if (this.color=="w") {
+                if (this.WINNER==true) {
+                    result="1-0";
+                }
+                if (this.LOSER==true) {
+                    result="0-1";
+                }
+                if (this.DRAW==true) {
+                    result="1/2-1/2";
+                }
+            }
+            if (this.color=="b") {
+                if (this.WINNER==true) {
+                    result="0-1";
+                }
+                if (this.LOSER==true) {
+                    result="1-0";
+                }
+                if (this.DRAW==true) {
+                    result="1/2-1/2";
+                }
+            }
+
+            let memData=this.prepareMemJSON(this.game.history());
+
+            let data={  "memData":JSON.stringify(memData),
+                        "result":result,
+                        };
+
+            console.log(data);
+            console.log("updating memory...");
+
+            $.ajax({
+                type: "POST",
+                url: "./updateMem.php",
+                data: data,
+                success: function (response) {
+                    console.log(response);
+                }
+            });
+
+        },
+        // resetPoints: function() {
+        //     this.types.forEach((type)=>{
+        //         for(row=0;row<8;row++) {
+        //             for(col=0;col<8;col++) {
+        //                 this.pointsGame[type][row][col]=this.points[type][row][col];
+        //             }
+        //         }
+        //     })
+        // },
+
+        sigmoid:function (t) {
+            return 1/(1+Math.pow(Math.E, -t));
+        },
+    
+        inverseSigmoid: function (t) {
+            return Math.log(t/(1-t));
+        },
+
+        inversePoints: function () {
+            // console.log(this.pointsGame);
+            Object.keys(this.pointsGame).forEach((k) => {
+                // console.log();
+                var reversed = this.pointsGame[k].map(function reverse(item) {
+                    return Array.isArray(item) && Array.isArray(item[0]) 
+                               ? item.map(reverse) 
+                               : item.reverse();
+                });
+                this.pointsGame[k]=reversed;
+            });
+            Object.keys(this.additionPerMove).forEach((k) => {
+                // console.log();
+                var reversed = this.additionPerMove[k].map(function reverse(item) {
+                    return Array.isArray(item) && Array.isArray(item[0]) 
+                               ? item.map(reverse) 
+                               : item.reverse();
+                });
+                this.additionPerMove[k]=reversed;
+            });
+            console.log(this.pointsGame);
+        },
+
+        calculateBest: function(gm=this.game,color=this.color) {
+            var value=0;
+            var maxGain=-1000000;
+            var bestMove="";
+            gm.moves().forEach((m)=> {
+                    var tempGame=new Chess(gm.fen());
+                    tempGame.move(m);
+                    if (tempGame.turn()==this.opponent) {
+                        // if (tempGame.in_check()) value=this.checkScore;
+                        if (tempGame.in_checkmate()) value=Number.POSITIVE_INFINITY;
+                    }
+                    if (tempGame.turn()==this.color) {
+                        // if (tempGame.in_check()) value=-this.checkScore;
+                        if (tempGame.in_checkmate()) value=Number.NEGATIVE_INFINITY;
+                    }
+                    var col=0;
+                    this.pointsGame.p.forEach((rowPoints)=>{
+                        var row=0;
+                        rowPoints.forEach((point)=>{
+                            var piece=tempGame.get(this.rows[row]+this.columns[col]);
+                            if (piece!=null) {
+                                if (piece.color==color) {
+                                    value+=this.piecePoints[piece.type]*this.pointsGame[piece.type][row][col];
+                                } 
+                                else {
+                                    value-=this.piecePoints[piece.type]*this.pointsGame[piece.type][row][col];
+                                }
+                            }
+                            row++;
+                        });
+                        col++;
+                    });
+                    if (value>maxGain) {
+                        maxGain=value;
+                        bestMove=m;
+                    }
+                }
+            );
+            return {gain:maxGain,move:bestMove};
+        },
+        calcGain: function(move,fen,gm=this.game,color=this.color) {
+                var value=0;
+                var tempGame=new Chess(gm.fen());
+                if (tempGame.turn()==this.opponent) {
+                    if (tempGame.in_checkmate()) {
+                        value=Number.POSITIVE_INFINITY; 
+                        return value;
+                    }
+                }
+                if (tempGame.turn()==this.color) {
+                    if (tempGame.in_checkmate()) {
+                        value=Number.NEGATIVE_INFINITY; 
+                        return value;
+                    } 
+                }
+                // console.log(MEMORY[fen]);
+                // if (MEMORY[this.fen]!==undefined) {
+                //         if (MEMORY[this.fen][move]!==undefined) {
+                //             console.log("move found");
+                //             value+=MEMORY[this.fen][move];
+                //         }
+                //     }  else {
+                var col=0;
+                this.pointsGame.p.forEach((rowPoints)=>{
+                var row=0;
+                rowPoints.forEach((point)=>{
+                    var piece=tempGame.get(this.rows[row]+this.columns[col]);
+                    if (piece!=null) {
+                        if (piece.color==color) {
+                            value+=this.piecePoints[piece.type]*this.pointsGame[piece.type][row][col];
+                        } else {
+                            value-=this.piecePoints[piece.type]*this.pointsGame[piece.type][row][col];
+                        }
+                    }
+                    row++;
+                });
+                col++;
+                });
+                    // }
+                // tempGame.move(move);
+                // let moves=tempGame.moves();
+                // let kMoves=0;
+                // moves.forEach(m=>{
+                //     if (m.indexOf("k")!=-1||m.indexOf("K")!=-1) {
+                //         kMoves++;
+                //     }
+                // })
+                // value-=(kMoves/8);
+                return value;
+        },
+        getDim:function(a) {
+            var dim = [];
+            for (;;) {
+                dim.push(a.length);
+
+                if (Array.isArray(a[0])) {
+                    a = a[0];
+                } else {
+                    break;
+                }
+            }
+            return dim;
+        },
+        selectMove:function(changeDepth=0) {
+            // let depth=this.depth+1;
+            // let tr=[...this.movetree];
+            // console.log(this.getDim(tr));
+            // let depth=this.depth;
+            // while(true) {
+            //     this.reduceMoveTreeMaxMin();
+            //     let tree=[...this.movetree];
+            //     if (this.getDim(tree).length==1) break;
+            // }
+            let notoSelect=[];
+            if (MEMORY[this.fen]!=undefined) {
+                let points=[]
+                    Object.keys(MEMORY[this.fen]).forEach((move)=>{
+                    if (MEMORY[this.fen][move]<0) notoSelect.push(move);
+                    points.push(MEMORY[this.fen][move]);
+                    console.log(notoSelect);
+                });
+                let max=points.reduce(function(a, b) {
+                    return Math.max(a, b);
+                    }, Number.NEGATIVE_INFINITY);
+                    this.actualMoves=this.game.moves();
+                    let MemMoves=Object.keys(MEMORY[this.fen])
+                    console.log(MEMORY[this.fen]);
+                    let selected=false;
+                    let val = points.reduce(function(a, b) {
+                        return Math.max(a, b);
+                        }, Number.NEGATIVE_INFINITY);
+                    while(!selected&&val>0) {
+                        let m=MemMoves[points.indexOf(val)];
+                        if (this.actualMoves.indexOf(m)!=-1) {
+                            selected=true;
+                            return m;
+                            break;
+                        }
+                        else {
+                            points.splice(points.indexOf(val),1);
+                            MemMoves.splice(points.indexOf(val),1);
+                        }
+                    }
+                    
+                    // console.log(val);
+                    this.movetree=[];
+
+                    for(let i=0;i<changeDepth;i++) {
+                        if (this.actualMoves.length>1) {
+                            this.actualMoves.splice(points.indexOf(val),1);
+                            points.splice(points.indexOf(val),1);
+                            val=points.reduce(function(a, b) {
+                            return Math.max(a, b);
+                            }, Number.NEGATIVE_INFINITY);
+                        } else {
+                            break;
+                        }
+                    }
+                    if (this.actualMoves.length>=1&&val>0) return this.actualMoves[points.indexOf(val)];
+                    else {
+                        this.calcMoves();
+                        }
+            }
+            let treeTemp=[...this.movetree];
+            // console.log("points length:",treeTemp.length);
+            this.actualMoves=this.game.moves();
+            // console.log("moves length:",this.actualMoves.length);
+            this.actualMoves.forEach((m,idx)=>{
+                // if (m.indexOf("+")!=-1) {
+                //     treeTemp[idx]+=this.checkScore;
+                //     // this.checkScore*=2;
+                //     }
+                if (m.indexOf("#")!=-1) treeTemp[idx]=Number.POSITIVE_INFINITY;
+            });
+            // console.log(tree);
+            let val = treeTemp.reduce(function(a, b) {
+                return Math.max(a, b);
+            }, Number.NEGATIVE_INFINITY);
+            console.log(val);
+            this.movetree=[];
+
+            for(let i=0;i<changeDepth;i++) {
+                if (this.actualMoves.length>1) {
+                    this.actualMoves.splice(treeTemp.indexOf(val),1);
+                    treeTemp.splice(treeTemp.indexOf(val),1);
+                    val=treeTemp.reduce(function(a, b) {
+                    return Math.max(a, b);
+                    }, Number.NEGATIVE_INFINITY);
+                } else {
+                    break;
+                }
+            }
+
+            while (notoSelect.indexOf(this.actualMoves[treeTemp.indexOf(val)])!=-1) {
+                console.log("notoselect run...");
+                if (this.actualMoves.length>1) {
+                    this.actualMoves.splice(treeTemp.indexOf(val),1);
+                    treeTemp.splice(treeTemp.indexOf(val),1);
+                    val=treeTemp.reduce(function(a, b) {
+                    return Math.max(a, b);
+                    }, Number.NEGATIVE_INFINITY);
+                } else {
+                    break;
+                }
+            }
+
+            return this.actualMoves[treeTemp.indexOf(val)];
+        },
+        reduceMoveTreeMaxMin: function(depth=this.depth,tree=this.movetree,parent=[this.movetree]) {
+            // if (depth>=0) {
+            // let c=true;
+            let x=[...tree];
+            if (this.getDim(x).length>1) {
+                tree.forEach((item,idx)=>{
+                    if (Array.isArray(item)) {
+                        let a=[...item];
+                        if (this.getDim(a).length>1) {
+                            this.reduceMoveTreeMaxMin(depth-1,item,tree[idx]);
+                        } else {
+                            let val;
+                            if (depth%2==1) {
+                                // item.forEach((i,idx)=>{
+                                //     if (!i) item[idx]=Number.NEGATIVE_INFINITY;
+                                // });
+                                val = item.reduce(function(a, b) {
+                                    return Math.max(a, b);
+                                }, Number.NEGATIVE_INFINITY);
+                            }
+                            if (depth%2==0) {
+                                // item.forEach((i,idx)=>{
+                                //     if (!i) item[idx]=Number.POSITIVE_INFINITY;
+                                // });
+                                val = item.reduce(function(a, b) {
+                                    return Math.min(a, b);
+                                }, Number.POSITIVE_INFINITY);
+                            }
+                            tree[idx]=val;
+                        }   
+                    }
+                    });
+            }
+            // }
+        },
+        minMax:function(node=this.game, depth, isMaximizingPlayer, alpha, beta, move, fen) {
+            let tempGame=new Chess(node.fen());
+            if (depth==0)
+                return this.calcGain(move,fen,tempGame);
+
+            if (isMaximizingPlayer) {
+                let bestVal = Number.NEGATIVE_INFINITY; 
+                let moves=tempGame.moves();
+                moves.forEach((m)=>{
+                    let f=tempGame.fen();
+                    tempGame.move(m);
+                    let value = this.minMax(tempGame, depth-1, false, alpha, beta,m,f);
+                    bestVal = Math.max( bestVal, value); 
+                    if (bestVal>=beta)
+                        return;
+                    alpha = Math.max( alpha, bestVal);
+                    tempGame.load(f);
+                    // if (beta <= alpha) return;
+                });
+                return bestVal;
+            } else {
+                let bestVal = Number.POSITIVE_INFINITY; 
+                let moves=tempGame.moves();
+                moves.forEach((m)=>{
+                    let f=tempGame.fen();
+                    tempGame.move(m);
+                    let value = this.minMax(tempGame, depth-1, true, alpha, beta,m,f);
+                    bestVal = Math.min( bestVal, value);
+                    if (bestVal<=alpha)
+                        return;
+                    beta = Math.min( beta, bestVal);
+                    tempGame.load(f);
+                    // if (beta <= alpha) return;
+                });
+                    return bestVal;
+            }
+        },
+        calcMoves: function(depth=this.depth, gm=this.game, tree=this.movetree) {
+            // if (depth>=0) {
+            //     let tempGame=new Chess(gm.fen());
+            //     // console.log(tempGame.ascii());
+            //     /**
+            //      * MINMAX rule 
+            //      * first layer is max
+            //      * 
+            //      */
+            //         let moves=tempGame.moves();
+            //         // if (depth==this.depth) this.actualMoves=[...moves];
+            //         // console.log(moves);
+            //         // console.log(moves.length);
+            //         moves.forEach((move,idx)=>{
+
+            //             let tempGame2=new Chess(tempGame.fen());
+            //             let fen=tempGame2.fen();
+            //             // console.log(fen);
+            //             tempGame2.move(move);
+            //             // console.log(tempGame2.fen());
+            //             // let increase=move.indexOf("x")!=-1?true:false;
+            //             // let increase=false;
+            //             // if (tempGame.game_over()) tree[idx]=100000;
+            //             if (tree.length<idx+1) {
+            //                 tree.push([]);
+            //             }
+
+            //             if (tempGame2.in_checkmate()) {
+            //                 let item=tree[idx];
+            //                 for(let i=(this.depth-depth);i<this.depth-1;i++) {
+            //                     item.push([]);
+            //                     item=item[0];
+            //                 }
+            //                 item=this.calcGain(move,fen,tempGame2,this.color);
+            //             }
+
+            //             if (depth==0) {
+            //                 tree[idx]=this.calcGain(move,fen,tempGame2,this.color);
+            //             }
+            //             // this.movetree.push(tree);
+            //             // console.log(this.movetree);
+            //             this.calcMoves(depth-1,tempGame2,tree[idx]);
+            //             // if (tempGame.in_checkmate()) {
+            //             //     gain=100000;
+            //             //     gains.push(gain);
+            //             //     // break;
+            //             // }
+            //             // return this.movetree;
+            //         });
+            // }
+                let tempGame=new Chess(gm.fen());
+                let moves=tempGame.moves();
+                moves.forEach((m,idx)=> {
+                let f=tempGame.fen();
+                tempGame.move(m);
+                let val=this.minMax(tempGame,depth-1,false,Number.NEGATIVE_INFINITY,Number.POSITIVE_INFINITY,m,f);
+                tempGame.load(f);
+                if (tree.length<idx+1) tree.push(val);
+                });
+        },
+        checkAndUpdateMem: function () {
+            if (this.game.in_checkmate()&&this.game.turn()==this.color) {
+                this.WINNER=false;
+                this.LOSER=true;
+                this.DRAW=false;
+                console.log("I LOSED :(");
+                // if (this.color=="w") {
+                //     // ais[this.game.plb].WINNER=true;
+                //     // console.log("WINNER:",this.game.plb,"GAME:",games.indexOf(this.game));
+                //     // document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>BLACK WINS</b>";
+                // }
+                // if (this.color=="b") {
+                //     // ais[this.game.plw].WINNER=true;
+                //     // console.log("WINNER:",this.game.plw,"GAME:",games.indexOf(this.game));
+                //     // document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>WHITE WINS</b>";
+                // }
+                // console.log("LOSER:",this.idx,"GAME:",games.indexOf(this.game));
+                // fin[games.indexOf(this.game)]=true;
+                // if (this.game.game_over()) {
+                // clearInterval(this.game.thread);
+                this.updateMemory();
+                return;
+                // }
+            } else if (this.game.in_checkmate()&&this.game.turn()==this.opponent) {
+                this.WINNER=true;
+                this.LOSER=false;
+                this.DRAW=false;
+                console.log("I WIN :D");
+                // if (this.color=="w") {
+                //     ais[this.game.plb].LOSER=true;
+                //     document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>WHITE WINS</b>";
+                // }
+                // if (this.color=="b") {
+                //     ais[this.game.plw].LOSER=true;
+                //     document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>BLACK WINS</b>";
+                // }
+                // console.log("WINNER:",this.idx,"GAME:",games.indexOf(this.game));
+                // // document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>WHITE WINS</b>";
+                // fin[games.indexOf(this.game)]=true;
+                // clearInterval(this.game.thread);
+                this.updateMemory();
+                return;
+
+            } else if (this.game.in_draw()||this.game.in_stalemate()||this.game.in_threefold_repetition()) {
+                this.WINNER=false;
+                this.LOSER=false;
+                this.DRAW=true;
+                console.log("DRAW :|")
+                // if (this.color=="w") {
+                //     ais[this.game.plb].DRAW=true;
+                // }
+                // if (this.color=="b") {
+                //     ais[this.game.plw].DRAW=true;
+                // }
+                // console.log("DRAWN:",this.idx,"GAME:",games.indexOf(this.game));
+                // document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>DRAW</b>";
+                // fin[games.indexOf(this.game)]=true;
+                // clearInterval(this.game.thread);
+
+                this.updateMemory();
+                return;
+
+            }
+        },
+
+        makeMove: function() {
+            // let r=this.minMax(this.game,this.depth,true,Number.NEGATIVE_INFINITY,Number.POSITIVE_INFINITY)
+            // console.log(r);
+            this.fen=this.game.fen();
+            let idx=this.fen.indexOf(" b ");
+            if (idx==-1) idx=this.fen.indexOf(" w ");
+            this.fen=this.fen.substr(0,idx);
+            // if (this.fen.indexOf("KQkq")!=-1) {
+            if (this.fens[this.fen]!=undefined) this.fens[this.fen]++;
+            else {
+                this.fens[this.fen]=0;
+            }
+            if (!this.game.game_over()&&this.game.turn()==this.color) {
+                if (MEMORY[this.fen]==undefined) {
+                    this.calcMoves();
+                }
+                console.log(this.movetree);
+
+                let m=this.selectMove(this.fens[this.fen]);
+                // console.log(this.movetree);
+                if (m==undefined) {
+                    this.DRAW=true;
+                    if (this.color=="w") {
+                        ais[this.game.plb].DRAW=true;
+                    }
+                    if (this.color=="b") {
+                        ais[this.game.plw].DRAW=true;
+                    }
+                    fin[games.indexOf(this.game)]=true;
+                    clearInterval(this.game.thread);
+                    console.log("GAME ERROR:",games.indexOf(this.game),"PLAYER:",this.idx);
+                    document.getElementById("info"+games.indexOf(this.game)).innerHTML="ERROR";
+                } else {
+                    console.log(m);
+                    // if (m.indexOf("+")!=-1) this.checkScore*=2;
+                    this.game.move(m);
+
+                    }
+                    console.log(this.historToPGN(this.game.history()));
+
+                    this.types.forEach((type) => {
+                        for (var row=0;row<8;row++) {
+                            for(var col=0;col<8;col++) {
+                                let val=this.pointsGame[type][row][col];
+                                this.pointsGame[type][row][col]=Math.sin(Math.asin(val)+this.additionPerMove[type][row][col]);
+                            }
+                        } 
+                        // this.piecePoints[type]+=this.pieceAdditionPerMove[type];
+                        // this.checkScore+=this.checkScoreBase;
+                    });
+                } else {
+                    this.checkAndUpdateMem();
+                }
+            }
+        }
+        
+    const chess = new Chess();
+    console.log(chess.fen().substr(0,chess.fen().indexOf(" ")));
+    const yavuz= new Yavuz(0,chess,"w");
+
+    $.ajax({
+            type: "GET",
+            url: "./BackupYavuz/ready.txt",
+            // url:"./BackupYavuz/ready.txt",
+            dataType: "html",
+            success: function (response,err) {
+                let elo=response.substr(4,response.indexOf("\n")-4);
+                response=response.substr(response.indexOf("POINTS"),response.length);
+                let points=response.substr(7,response.indexOf("\n")-7);
+                response=response.substr(response.indexOf("ADDITIONPERMOVE"),response.length);
+                let addPerMove=response.substr(16,response.indexOf("\n")-16);
+                response=response.substr(response.indexOf("ADDITONPIECE"),response.length);
+                let addPiecePerMove=response.substr(13,response.indexOf("\n")-13);
+                response=response.substr(response.indexOf("CHECKSCORE"),response.length);
+                let checkScore=response.substr(11,response.indexOf("\n")-11);
+                yavuz.elo=parseInt(elo);
+                yavuz.points=JSON.parse(points);
+                console.log(yavuz.points);
+                yavuz.pointsGame=JSON.parse(JSON.stringify(yavuz.points));
+                yavuz.additionPerMove=JSON.parse(addPerMove);
+                yavuz.pieceAdditionPerMove={p:0.1,r:0.5,n:0.3,b:0.3,k:0.0,q:0.9};
+                // yavuz.pieceAdditionPerMove=JSON.parse(addPiecePerMove);
+                // console.log(plw.pieceAdditionPerMove["b"]);
+                yavuz.checkScoreBase=parseFloat(checkScore);
+                yavuz.checkScore=parseFloat(checkScore);
+                // console.log(addPerMove);
+                $.ajax({
+                    type:"GET",
+                    url:"./memory/memory.json",
+                    dataType:"json",
+                    success:function (response,err) { 
+                        // MEMORY=response;
+                        // console.log(MEMORY);
+                        // compinit1=true;
+                        yavuz.makeMove();
+                        board.setPosition(chess.fen());
+                        }
+                    });
+                    // yavuz.makeMove();
+                    // board.setPosition(chess.fen());
+            },
+            error:function (err) {
+                
+            }
+        });
+    let inpHandler=COLOR.black;
+    let errMove;
+
+    function inputHandler(event) {
+        // console.log("event", event)
+        event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot)
+        event.chessboard.removeMarkers(undefined, MARKER_TYPE.square)
+        if (event.type === INPUT_EVENT_TYPE.moveStart) {
+            const moves = chess.moves({square: event.square, verbose: true});
+            event.chessboard.addMarker(event.square, MARKER_TYPE.square)
+            for (const move of moves) { // draw dots on possible moves
+                event.chessboard.addMarker(move.to, MARKER_TYPE.dot)
+            }
+            return moves.length > 0
+        } else if (event.type === INPUT_EVENT_TYPE.moveDone) {
+            const move = {from: event.squareFrom, to: event.squareTo}
+            const result = chess.move(move)
+            if (result) {
+                event.chessboard.disableMoveInput()
+                event.chessboard.setPosition(chess.fen())
+                const possibleMoves = chess.moves({verbose: true})
+                if (possibleMoves.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * possibleMoves.length)
+                    const randomMove = possibleMoves[randomIndex]
+                    setTimeout(() => { // smoother with 500ms delay
+                        if (chess.turn()==yavuz.color) yavuz.makeMove();
+                        event.chessboard.enableMoveInput(inputHandler, inpHandler);
+                        event.chessboard.setPosition(chess.fen());
+                    }, 500)
+                } else {
+                    if (chess.game_over()) yavuz.checkAndUpdateMem(); //last time
+                    console.log("makeMove son kez çağırıldı");
+                }
+            } else {
+                // console.log(chess.fen());
+                // console.warn("invalid move", move);
+                let piece=chess.get(move.from);
+                if (piece.type=="p") {
+                    if (move.to.indexOf("8")!=-1||move.to.indexOf("1")!=-1) {
+                        let options=document.getElementById("options");
+                        options.innerHTML="";
+                        let types=["Q","R","B","N"];
+                        types.forEach((type)=>{
+                            let img=document.createElement("img");
+                            img.src="../assets/images/"+yavuz.color+type+".png";
+                            options.appendChild(img);
+                            img.onclick=function() {
+                                Promote(type);
+                            }
+                        });
+                        options.style.display="block";
+                    }
+                    errMove=move;
+                }
+            }
+            return result
+        }
+    }
+
+    const board = new Chessboard(document.getElementById("board"), {
+        position: chess.fen(),
+        sprite: {url: "../assets/images/chessboard-sprite-staunty.svg"},
+        style: {moveFromMarker: undefined, moveToMarker: undefined}, // disable standard markers
+        orientation: COLOR.white
+    });
+
+    function Promote(type) {
+        const moves=chess.moves();
+        moves.forEach(move => {
+            if (move.indexOf(errMove.to)!=-1&&move.indexOf("="+type)!=-1) {
+                const result = chess.move(move);
+            if (result) {
+                board.disableMoveInput()
+                board.setPosition(chess.fen())
+                const possibleMoves = chess.moves({verbose: true})
+                if (possibleMoves.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * possibleMoves.length)
+                    const randomMove = possibleMoves[randomIndex]
+                    setTimeout(() => { // smoother with 500ms delay
+                        if (chess.turn()==yavuz.color) yavuz.makeMove();
+                        board.enableMoveInput(inputHandler, inpHandler);
+                        board.setPosition(chess.fen())
+                    }, 500)
+                    }
+                }
+                document.getElementById("options").style.display="none";
+                return;
+            }
+        });
+    }
+    function changeSide() {
+        yavuz.color=="w"?yavuz.color="b":yavuz.color="w";
+        yavuz.color=="w"?yavuz.opponent="b":yavuz.opponent="w";
+        console.log(yavuz.opponent);
+        board.setOrientation(yavuz.color);
+        inpHandler==COLOR.white?inpHandler=COLOR.black:inpHandler=COLOR.white;
+        board.enableMoveInput(inputHandler, inpHandler);
+        chess.reset();
+        yavuz.game=chess;
+        board.setPosition(chess.fen());
+        yavuz.piecePoints={p:10,r:50,n:30,b:30,k:900,q:90};
+        yavuz.pointsGame=yavuz.points;
+        yavuz.inversePoints();
+        yavuz.fens={};
+        if (yavuz.color=="w") yavuz.makeMove();
+        board.setPosition(chess.fen());
+    }
+    function undoLastMove(params) {
+        yavuz.game.undo();
+        yavuz.game.undo();
+        board.setPosition(yavuz.game.fen());
+        for (var row=0;row<8;row++) {
+            for(var col=0;col<8;col++) {
+                yavuz.types.forEach((type)=>{
+                    let val=this.pointsGame[type][row][col];
+                    // this.pointsGame[type][row][col]=this.sigmoid(this.inverseSigmoid(val)+this.additionPerMove[type][row][col]);
+                });
+            }
+        } 
+        // this.piecePoints[type]-=this.pieceAdditionPerMove[type];
+        if (yavuz.game.turn()==yavuz.color) {
+            yavuz.makeMove();
+            board.enableMoveInput(inputHandler, inpHandler);
+            board.setPosition(chess.fen());
+        }
+    }
+    board.enableMoveInput(inputHandler, inpHandler);
+    document.getElementById("degistir").onclick=changeSide;
+    document.getElementById("undo").onclick=undoLastMove;
+</script>
+</body>
+</html>

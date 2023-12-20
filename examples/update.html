@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<script src="../node_modules/jquery/dist/jquery.js"></script>
+<script src="../node_modules/chess.js/chess.js"></script>
+<!-- <script src="../src/yavuz/yavuz.js" type="module"></script> -->
+<script type=module>
+// let ais=[];
+// let types=["p","r","n","b","q","k"];
+// let crossoverIds=[0, 2, 5, 10, 12, 14, 18, 20, 24, 25, 26, 28, 29, 30, 32, 34, 36, 37, 38, 39];
+// let compinit1=false;
+for(let idx=0;idx<40;idx++) {
+    let color="w";
+    idx%2==1?color="w":color="b";
+    $.ajax({
+        type: "GET",
+        url: "./BackupYavuz/"+idx.toString()+".txt",
+        dataType: "html",
+        success: function (response,err) {
+            let elo=response.substr(4,response.indexOf("\n")-4);
+            response=response.substr(response.indexOf("POINTS"),response.length);
+            let points=response.substr(7,response.indexOf("\n")-7);
+            response=response.substr(response.indexOf("ADDITIONPERMOVE"),response.length);
+            let addPerMove=response.substr(16,response.indexOf("\n")-16);
+            response=response.substr(response.indexOf("ADDITONPIECE"),response.length);
+            let addPiecePerMove=response.substr(13,response.indexOf("\n")-13);
+            // let pieceAdditionPerMove={p:Math.random(),r:Math.random(),n:Math.random(),b:Math.random(),k:Math.random(),q:Math.random()};
+            response=response.substr(response.indexOf("CHECKSCORE"),response.length);
+            let checkScore=response.substr(11,response.indexOf("\n")-11);
+            elo=parseInt(elo);
+            elo=2000; //change elo here;
+            points=JSON.parse(points);
+            let additionPerMove=JSON.parse(addPerMove);
+            // let addPiecePerMove=pieceAdditionPerMove;
+            // console.log(addPiecePerMove);
+            // ai.elo=elo;
+            // ai.points=points;
+            // ai.addPiecePerMove=additionPerMove;
+            // ai.pieceAdditionPerMove=addPiecePerMove;
+            // additionPerMove=JSON.parse(additionPerMove);
+            checkScore=parseFloat(checkScore);
+            let udata={
+                id:idx.toString(),
+                points:JSON.stringify(points),
+                additionPerMove:JSON.stringify(additionPerMove),
+                pieceAdditionPerMove:JSON.stringify(addPiecePerMove),
+                checkScore:checkScore.toString(),
+                elo:2000
+            }
+
+            console.log(udata);
+            $.ajax({
+                type: "POST",
+                url: "./saveAi.php/",
+                data:udata,
+                dataType: "json",
+                success:function(response) {
+                    console.log(response);
+                    // compinit1=true;
+                }
+            })
+            // console.log(udata);
+        },
+    });  
+}
+
+// crossoverModels();
+</script>
+<body>
+    
+</body>
+</html>l
