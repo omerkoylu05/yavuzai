@@ -18,7 +18,7 @@ let ready=false;
     //         //text = text.replace(/</g, "&lt;");
     //         //text = text.replace(/>/g, "&gt;");
     //         //text = text.replace('\n', '<br>', 'g');
-    //         //console.log(text);
+    //         console.log(text);
     //         if (element) {
     //           element.value += text + "\n";
     //           element.scrollTop = element.scrollHeight; // focus on bottom
@@ -74,10 +74,9 @@ let ready=false;
     //   };
     Module.onRuntimeInitialized = function() {
         Module._set_depth(20);
-        ready=true;
         console.log("module loaded...");
     }
-    //   //console.log(Module);
+    //   console.log(Module);
 
 var games=[];
 var boards=[];
@@ -150,8 +149,8 @@ document.addEventListener('readystatechange', event => {
             success: function (response,err) {
                 let elo=response.substr(4,response.indexOf("\n")-4);
                 response=response.substr(response.indexOf("CE_PASSEDPAWNS"),response.length);
-                let ce_passedPawns=response.substr(15,response.indexOf("\n")-15);
-                //console.log(ce_passedPawns);
+                let ce_passedPawns2=response.substr(15,response.indexOf("\n")-15);
+                console.log(ce_passedPawns2);
                 response=response.substr(response.indexOf("CE_PAWNWEAKNESSES"),response.length);
                 let ce_pawnWeaknesses=response.substr(18,response.indexOf("\n")-18);
                 response=response.substr(response.indexOf("CE_PIECEACTIVITY"),response.length);
@@ -162,8 +161,10 @@ document.addEventListener('readystatechange', event => {
                 let ce_pieceCoordination=response.substr(21,response.indexOf("\n")-21);
                 response=response.substr(response.indexOf("CE_MATERIAL"),response.length);
                 let ce_material=response.substr(12,response.indexOf("\n")-12);
+                response=response.substr(response.indexOf("CE_KINGSAFETY"),response.length);
+                let ce_kingsafety=response.substr(14,response.indexOf("\n")-14);
                 response=response.substr(response.indexOf("C_PIECESQUARETABLES"),response.length);
-                let c_pieceSquareTables=response.substr(20,response.indexOf("\n")-20);
+                let ce_pieceSquareTables=response.substr(20,response.indexOf("\n")-20);
                 response=response.substr(response.indexOf("C_MOBILITY"),response.length);
                 let c_mobility=response.substr(11,response.indexOf("\n")-11);
                 response=response.substr(response.indexOf("C_KINGSAFETY"),response.length);
@@ -172,23 +173,47 @@ document.addEventListener('readystatechange', event => {
                 let c_pawnStructure=response.substr(16,response.indexOf("\n")-16);
                 response=response.substr(response.indexOf("C_PIECECOORDINATION"),response.length);
                 let c_pieceCoordination=response.substr(20,response.length-20);
+                response=response.substr(response.indexOf("C_ROOKANDPAWNMOVEMENT"),response.length);
+                let c_rookandPawnMovement=response.substr(22,response.length-22);
+                response=response.substr(response.indexOf("C_CENTERCONTROL"),response.length);
+                let c_centerControl=response.substr(16,response.length-16);
+                response=response.substr(response.indexOf("C_DEVELOPPIECES"),response.length);
+                let c_developPieces=response.substr(16,response.length-16);
                 response=response.substr(response.indexOf("C_MATERIAL"),response.length);
                 let c_material=response.substr(11,response.length);
                 plw.elo=parseInt(elo);
-                plw.ce_passedPawns2=parseFloat(ce_passedPawns);
+                plw.ce_passedPawns2=parseFloat(ce_passedPawns2);
+                console.log(ce_passedPawns2);
                 plw.ce_pawnWeaknesses=parseFloat(ce_pawnWeaknesses);
+                console.log(ce_pawnWeaknesses);
                 plw.ce_pieceActivity=parseFloat(ce_pieceActivity);
+                console.log(ce_pieceActivity);
                 plw.ce_kingPawnShield=parseFloat(ce_kingPawnShield);
+                console.log(ce_kingPawnShield);
                 plw.ce_pieceCoordination=parseFloat(ce_pieceCoordination);
+                console.log(ce_pieceCoordination);
                 plw.ce_material=parseFloat(ce_material);
-                plw.c_pieceSquareTables=parseFloat(c_pieceSquareTables);
+                console.log(ce_material);
+                plw.ce_kingsafety=parseFloat(ce_kingsafety);
+                ce_pieceSquareTables=parseFloat(ce_pieceSquareTables);
+                console.log(ce_pieceSquareTables);
 
                 plw.c_mobility=parseFloat(c_mobility);
+                console.log(c_mobility);
                 plw.c_kingSafety=parseFloat(c_kingSafety);
+                console.log(c_kingSafety);
                 plw.c_pawnStructure=parseFloat(c_pawnStructure);
+                console.log(c_pawnStructure);
                 plw.c_pieceCoordination=parseFloat(c_pieceCoordination);
+                console.log(ce_pieceCoordination);
+                plw.c_rookandPawnMovement=parseFloat(c_rookandPawnMovement);
+                console.log(c_rookandPawnMovement);
+                plw.c_centerControl=parseFloat(c_centerControl);
+                console.log(c_centerControl);
+                plw.c_developPieces=parseFloat(c_developPieces);
+                console.log(c_developPieces);
                 plw.c_material=parseFloat(c_material);
-                // plw.defaultPoints=JSON.parse(points);
+                console.log(c_material);// plw.defaultPoints=JSON.parse(points);
                 // let opoints={...plw.points};
                 // plw.inversePoints(opoints);
                 // plw.opoints=opoints;
@@ -201,10 +226,10 @@ document.addEventListener('readystatechange', event => {
                 // plw.inversePoints(plw.oadditionPerMove);
                 // plw.pieceAdditionPerMove={p:1.0,r:1.0,n:1.0,b:1.0,k:1.0,q:1.0};
                 // plw.pieceAdditionPerMove=JSON.parse(addPiecePerMove);
-                // //console.log(plw.pieceAdditionPerMove["b"]);
+                // console.log(plw.pieceAdditionPerMove["b"]);
                 // plw.checkScoreBase=parseFloat(checkScore);
                 // plw.checkScore=parseFloat(checkScore);
-                // //console.log(addPerMove);
+                // console.log(addPerMove);
                 compinit1=true;
             },
             error:function (err) {
@@ -220,8 +245,8 @@ document.addEventListener('readystatechange', event => {
             success: function (response,err) {
                 let elo=response.substr(4,response.indexOf("\n")-4);
                 response=response.substr(response.indexOf("CE_PASSEDPAWNS"),response.length);
-                let ce_passedPawns=response.substr(15,response.indexOf("\n")-15);
-                //console.log(ce_passedPawns);
+                let ce_passedPawns2=response.substr(15,response.indexOf("\n")-15);
+                console.log(ce_passedPawns2);
                 response=response.substr(response.indexOf("CE_PAWNWEAKNESSES"),response.length);
                 let ce_pawnWeaknesses=response.substr(18,response.indexOf("\n")-18);
                 response=response.substr(response.indexOf("CE_PIECEACTIVITY"),response.length);
@@ -232,8 +257,10 @@ document.addEventListener('readystatechange', event => {
                 let ce_pieceCoordination=response.substr(21,response.indexOf("\n")-21);
                 response=response.substr(response.indexOf("CE_MATERIAL"),response.length);
                 let ce_material=response.substr(12,response.indexOf("\n")-12);
+                response=response.substr(response.indexOf("CE_KINGSAFETY"),response.length);
+                let ce_kingsafety=response.substr(14,response.indexOf("\n")-14);
                 response=response.substr(response.indexOf("C_PIECESQUARETABLES"),response.length);
-                let c_pieceSquareTables=response.substr(20,response.indexOf("\n")-20);
+                let ce_pieceSquareTables=response.substr(20,response.indexOf("\n")-20);
                 response=response.substr(response.indexOf("C_MOBILITY"),response.length);
                 let c_mobility=response.substr(11,response.indexOf("\n")-11);
                 response=response.substr(response.indexOf("C_KINGSAFETY"),response.length);
@@ -242,22 +269,48 @@ document.addEventListener('readystatechange', event => {
                 let c_pawnStructure=response.substr(16,response.indexOf("\n")-16);
                 response=response.substr(response.indexOf("C_PIECECOORDINATION"),response.length);
                 let c_pieceCoordination=response.substr(20,response.length-20);
+                response=response.substr(response.indexOf("C_ROOKANDPAWNMOVEMENT"),response.length);
+                let c_rookandPawnMovement=response.substr(22,response.length-22);
+                response=response.substr(response.indexOf("C_CENTERCONTROL"),response.length);
+                let c_centerControl=response.substr(16,response.length-16);
+                response=response.substr(response.indexOf("C_DEVELOPPIECES"),response.length);
+                let c_developPieces=response.substr(16,response.length-16);
                 response=response.substr(response.indexOf("C_MATERIAL"),response.length);
                 let c_material=response.substr(11,response.length);
                 plb.elo=parseInt(elo);
-                plb.ce_passedPawns2=parseFloat(ce_passedPawns);
+                plb.ce_passedPawns2=parseFloat(ce_passedPawns2);
+                console.log(ce_passedPawns2);
                 plb.ce_pawnWeaknesses=parseFloat(ce_pawnWeaknesses);
+                console.log(ce_pawnWeaknesses);
                 plb.ce_pieceActivity=parseFloat(ce_pieceActivity);
+                console.log(ce_pieceActivity);
                 plb.ce_kingPawnShield=parseFloat(ce_kingPawnShield);
+                console.log(ce_kingPawnShield);
                 plb.ce_pieceCoordination=parseFloat(ce_pieceCoordination);
+                console.log(ce_pieceCoordination);
                 plb.ce_material=parseFloat(ce_material);
-                plb.c_pieceSquareTables=parseFloat(c_pieceSquareTables);
+                console.log(ce_material);
+                plb.ce_kingsafety=parseFloat(ce_kingsafety);
+                plb.ce_pieceSquareTables=parseFloat(ce_pieceSquareTables);
+                console.log(ce_pieceSquareTables);
 
                 plb.c_mobility=parseFloat(c_mobility);
+                console.log(c_mobility);
                 plb.c_kingSafety=parseFloat(c_kingSafety);
+                console.log(c_kingSafety);
                 plb.c_pawnStructure=parseFloat(c_pawnStructure);
+                console.log(c_pawnStructure);
                 plb.c_pieceCoordination=parseFloat(c_pieceCoordination);
+                console.log(ce_pieceCoordination);
+                plb.c_rookandPawnMovement=parseFloat(c_rookandPawnMovement);
+                console.log(c_rookandPawnMovement);
+                plb.c_centerControl=parseFloat(c_centerControl);
+                console.log(c_centerControl);
+                plb.c_developPieces=parseFloat(c_developPieces);
+                console.log(c_developPieces);
                 plb.c_material=parseFloat(c_material);
+                console.log(c_material);
+
                 // plb.points=JSON.parse(points);
                 // plb.defaultPoints=JSON.parse(points);
                 // plb.pointsGame={...plb.points};
@@ -272,7 +325,7 @@ document.addEventListener('readystatechange', event => {
                 // plb.pieceAdditionPerMove={p:0.1,r:0.5,n:0.3,b:0.3,k:0.0,q:0.9};
                 // plb.checkScoreBase=parseFloat(checkScore);
                 // plb.checkScore=parseFloat(checkScore);
-                // //console.log(checkScore);
+                // console.log(checkScore);
                 compinit2=true;
             },
             error:function (err) {
@@ -285,7 +338,7 @@ document.addEventListener('readystatechange', event => {
         //     dataType:"json",
         //     success:function (response,err) { 
         //         MEMORY=response;
-        //         // //console.log(MEMORY);
+        //         // console.log(MEMORY);
 
                 // yavuz.makeMove();
                 // board.setPosition(chess.fen());
@@ -310,7 +363,7 @@ document.addEventListener('readystatechange', event => {
     //         data: vals,
     //         dataType: "json",
     //         success: function (response) {
-    //             //console.log(response);
+    //             console.log(response);
     //         }
     //     });
     // });
@@ -401,7 +454,7 @@ AiProcedures.prototype = {
             elos.push(ai.elo);
             ortalama+=ai.elo;
         });
-        //console.log("ELO POINTS",elos);
+        console.log("ELO POINTS",elos);
         this.best=max;
         this.worst=min;
         ortalama=ortalama/elos.length;
@@ -447,12 +500,12 @@ AiProcedures.prototype = {
     },
     mutateModels: function() {
         // let types=["p","r","n","b","k","q"];
-        //console.log(this.mutateIds);
+        console.log(this.mutateIds);
         this.mutateIds.forEach(idx => {
             let ai=this.ais[idx];
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.ce_passedPawns2);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -460,7 +513,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.ce_pawnWeaknesses);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -468,7 +521,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.ce_pieceActivity);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -476,7 +529,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.ce_kingPawnShield);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -484,7 +537,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.ce_pieceCoordination);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -492,7 +545,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.ce_material);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -500,7 +553,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.c_pieceSquareTables);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -508,7 +561,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.c_mobility);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -516,7 +569,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.ce_passedPawns);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -524,7 +577,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.c_kingSafety);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -532,7 +585,7 @@ AiProcedures.prototype = {
             }
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.c_pawnStructure);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -541,7 +594,7 @@ AiProcedures.prototype = {
 
             if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.c_pieceCoordination);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
@@ -549,12 +602,48 @@ AiProcedures.prototype = {
             }
 
             if (Math.random()>0.75) {
+                let angle=this.inverseSigmoid(ai.c_rookandPawnMovement);
+                angle+=(Math.random()-0.5)*0.1;
+                angle=this.sigmoid(angle);
+                angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
+                angle<0?angle=0.0000000000000001:angle=angle;
+                ai.c_rookandPawnMovement=angle;
+            }
+
+            if (Math.random()>0.75) {
+                let angle=this.inverseSigmoid(ai.c_centerControl);
+                angle+=(Math.random()-0.5)*0.1;
+                angle=this.sigmoid(angle);
+                angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
+                angle<0?angle=0.0000000000000001:angle=angle;
+                ai.c_centerControl=angle;
+            }
+
+            if (Math.random()>0.75) {
+                let angle=this.inverseSigmoid(ai.c_developPieces);
+                angle+=(Math.random()-0.5)*0.1;
+                angle=this.sigmoid(angle);
+                angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
+                angle<0?angle=0.0000000000000001:angle=angle;
+                ai.c_developPieces=angle;
+            }
+
+            if (Math.random()>0.75) {
                 let angle=this.inverseSigmoid(ai.c_material);
-                angle+=Math.random()-0.5;
+                angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
                 ai.c_material=angle;
+            }
+
+            if (Math.random()>0.75) {
+                let angle=this.inverseSigmoid(ai.ce_kingSafety);
+                angle+=(Math.random()-0.5)*0.1;
+                angle=this.sigmoid(angle);
+                angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
+                angle<0?angle=0.0000000000000001:angle=angle;
+                ai.ce_kingSafety=angle;
             }
             // ai.types.forEach((type)=>{
             //     for(let row=0;row<8;row++) {
@@ -605,12 +694,12 @@ AiProcedures.prototype = {
             // let opoints=JSON.parse(JSON.stringify(this.ais[idx].points));
             // this.ais[idx].inversePoints(opoints);
             // this.ais[idx].oadditionPerMove=opoints;
-            // // //console.log(this.ais[idx].points);
+            // // console.log(this.ais[idx].points);
         });
-        //console.log("mutations of models are completed!");
+        console.log("mutations of models are completed!");
     },
     crossoverModels:function() {
-        //console.log(this.crossoverIds);
+        console.log(this.crossoverIds);
         this.crossoverIds.forEach((idx,index)=>{
             // if (this.crossoverids.length>index+1) {
                 if (this.crossoverIds.length>index+1) {
@@ -683,9 +772,33 @@ AiProcedures.prototype = {
                     }
 
                     if (Math.random()>0.75) {
+                        tmp=this.ais[idx].c_rookandPawnMovement;
+                        this.ais[idx].c_rookandPawnMovement=this.ais[this.crossoverIds[index+1]].c_rookandPawnMovement;
+                        this.ais[this.crossoverIds[index+1]].c_rookandPawnMovement=tmp;
+                    }
+
+                    if (Math.random()>0.75) {
+                        tmp=this.ais[idx].c_centerControl;
+                        this.ais[idx].c_centerControl=this.ais[this.crossoverIds[index+1]].c_centerControl;
+                        this.ais[this.crossoverIds[index+1]].c_centerControl=tmp;
+                    }
+
+                    if (Math.random()>0.75) {
+                        tmp=this.ais[idx].c_developPieces;
+                        this.ais[idx].c_developPieces=this.ais[this.crossoverIds[index+1]].c_developPieces;
+                        this.ais[this.crossoverIds[index+1]].c_developPieces=tmp;
+                    }
+
+                    if (Math.random()>0.75) {
                         tmp=this.ais[idx].c_material;
                         this.ais[idx].c_material=this.ais[this.crossoverIds[index+1]].c_material;
                         this.ais[this.crossoverIds[index+1]].c_material=tmp;
+                    }
+
+                    if (Math.random()>0.75) {
+                        tmp=this.ais[idx].ce_kingSafety;
+                        this.ais[idx].ce_kingSafety=this.ais[this.crossoverIds[index+1]].ce_kingSafety;
+                        this.ais[this.crossoverIds[index+1]].ce_kingSafety=tmp;
                     }
                     // for (let row=0;row<8;row++) {
                     //     this.ais[idx].types.forEach((type)=>{
@@ -723,10 +836,10 @@ AiProcedures.prototype = {
                     //     this.ais[this.crossoverIds[index+1]].checkScore=this.ais[this.crossoverIds[index+1]].checkScoreBase;
                     // }
                     // let types=["p","r","n","b","k","q"];
-                    // // //console.log(types);
+                    // // console.log(types);
                     // // types.forEach((type)=>{
-                    // //     // //console.log(this.ais[idx]);
-                    // //     // //console.log(this.ais[idx].pieceAdditionPerMove);
+                    // //     // console.log(this.ais[idx]);
+                    // //     // console.log(this.ais[idx].pieceAdditionPerMove);
                     // //     if (Math.random()>=0.50) {
                     // //         let temp=this.ais[idx].pieceAdditionPerMove[type];
                     // //         this.ais[idx].pieceAdditionPerMove[type]=this.ais[this.crossoverIds[index+1]].pieceAdditionPerMove[type];
@@ -744,7 +857,7 @@ AiProcedures.prototype = {
             this.ais[idx].inversePoints(opoints);
             this.ais[idx].oadditionPerMove=opoints;
         });
-        //console.log("Crossover processes are completed!");
+        console.log("Crossover processes are completed!");
     }
 }
 
@@ -794,18 +907,22 @@ function Yavuz(idx,game,color) {
             this.rookCount=0;
             
             //midgame coefs...
-            this.ce_passedPawns2=Math.random();
-            this.ce_pawnWeaknesses=Math.random();
-            this.ce_pieceActivity=Math.random();
-            this.ce_kingPawnShield=Math.random();
-            this.ce_pieceCoordination=Math.random();
-            this.c_material=Math.random();
-            this.ce_material=Math.random();
-            this.c_pieceSquareTables=Math.random();
-            this.c_mobility=Math.random();
-            this.c_kingSafety=Math.random();
-            this.c_pawnStructure=Math.random();
-            this.c_pieceCoordination=Math.random();
+            this.ce_passedPawns2=0.5//Math.random();
+            this.ce_pawnWeaknesses=0.5;
+            this.ce_pieceActivity=0.5;
+            this.ce_kingPawnShield=0.5;
+            this.ce_pieceCoordination=0.5;
+            this.c_material=0.5;
+            this.ce_material=0.5;
+            this.ce_kingSafety=0.5;
+            this.c_pieceSquareTables=0.5;
+            this.c_mobility=0.5;
+            this.c_kingSafety=0.5;
+            this.c_pawnStructure=0.5;
+            this.c_rookandPawnMovement=0.5;
+            this.c_centerControl=0.5;
+            this.c_developPieces=0.5;
+            this.c_pieceCoordination=0.5;
 
             
             this.types.forEach((type)=>{
@@ -833,9 +950,9 @@ function Yavuz(idx,game,color) {
             this.inversePoints(this.opoints);
             this.oadditionPerMove=JSON.parse(JSON.stringify(this.additionPerMove));
             this.inversePoints(this.oadditionPerMove);
-            // //console.log(this.points);
+            // console.log(this.points);
             // this.pointsGame["b"][0][0]=5.0;
-            // //console.log(this.points);
+            // console.log(this.points);
             this.pieceAdditionPerMove={p:Math.random(),r:Math.random(),n:Math.random(),b:Math.random(),k:Math.random(),q:Math.random()};
             // this.gpu=new GPU();
         },
@@ -849,8 +966,8 @@ function Yavuz(idx,game,color) {
         },
 
         inversePoints: function (ps) {
-            // //console.log(this.pointsGame);
-            // //console.log(ps);
+            // console.log(this.pointsGame);
+            // console.log(ps);
             let types=["p","n","b","r","q","k"];
             if (ps=!{}) {
             types.forEach(type=>{
@@ -862,7 +979,7 @@ function Yavuz(idx,game,color) {
             });          
             } 
             // Object.keys(this.pointsGame).forEach((k) => {
-            //     // //console.log();
+            //     // console.log();
             //     var reversed = this.pointsGame[k].map(function reverse(item) {
             //         return Array.isArray(item) && Array.isArray(item[0]) 
             //                    ? item.map(reverse) 
@@ -871,7 +988,7 @@ function Yavuz(idx,game,color) {
             //     this.pointsGame[k]=reversed;
             // });
             // Object.keys(this.additionPerMove).forEach((k) => {
-            //     // //console.log();
+            //     // console.log();
             //     var reversed = this.additionPerMove[k].map(function reverse(item) {
             //         return Array.isArray(item) && Array.isArray(item[0]) 
             //                    ? item.map(reverse) 
@@ -879,7 +996,7 @@ function Yavuz(idx,game,color) {
             //     });
             //     this.additionPerMove[k]=reversed;
             // });
-            // //console.log(this.pointsGame);
+            // console.log(this.pointsGame);
         },
         // resetPoints: function() {
         //     this.types.forEach((type)=>{
@@ -933,7 +1050,7 @@ function Yavuz(idx,game,color) {
                 if (cell) {
                     cell.color==this.color?val++:val--;
                     // if (cell.color==this.color) {
-        //                 // //console.log(gm.moves({square:col+row}).length);
+        //                 // console.log(gm.moves({square:col+row}).length);
                         val+=movesme.filter(item=>{
                             if (item.to==col+row) return item;
                         }).length;
@@ -1099,9 +1216,9 @@ function Yavuz(idx,game,color) {
             let idx=nthIndexOf(f,"/",6);
 
             let bPos=f.slice(0,nthIndexOf(f,"/",2));
-            // //console.log(bPos);
+            // console.log(bPos);
             let wPos=f.slice(idx+1,f.indexOf(" "));
-            // //console.log(wPos);
+            // console.log(wPos);
             let wp=[...wPos];
             wPos=[];
             wp.forEach(c=>{
@@ -1130,7 +1247,7 @@ function Yavuz(idx,game,color) {
                 **/
                let val=0;
                     let hist=this.game.history();
-                    // //console.log(hist);
+                    // console.log(hist);
                     hist.push(m);
                     
                     let me=0;
@@ -1149,8 +1266,8 @@ function Yavuz(idx,game,color) {
                     }).length;
                     val-=s;
                     val+=s1;
-                    // //console.log(s);
-                    // //console.log(s1);
+                    // console.log(s);
+                    // console.log(s1);
                     if (m=="O-O"||m=="O-O-O") {
                         gm.turn()==this.color?val++:val--;
                     }
@@ -1161,17 +1278,17 @@ function Yavuz(idx,game,color) {
             
         let val=0;
         // val+=1*this.kingActivity(movesme,movesopp);
-        // //console.log(this.c_centerControl);
-        // //console.log(this.c_developPieces);
-        // //console.log(this.c_kingProtection);
-        // //console.log(this.c_rookandPawnMovement);
-        // //console.log(this.c_material);
-        // //console.log(this.c_safety);
-        // //console.log(this.ce_kingActivity);
-        // //console.log(this.ce_material);
-        // //console.log(this.ce_passedPawns);
-        // //console.log(this.ce_safety);
-        // //console.log(this.ce_kingProtection);
+        // console.log(this.c_centerControl);
+        // console.log(this.c_developPieces);
+        // console.log(this.c_kingProtection);
+        // console.log(this.c_rookandPawnMovement);
+        // console.log(this.c_material);
+        // console.log(this.c_safety);
+        // console.log(this.ce_kingActivity);
+        // console.log(this.ce_material);
+        // console.log(this.ce_passedPawns);
+        // console.log(this.ce_safety);
+        // console.log(this.ce_kingProtection);
         val+=this.c_centerControl*this.centerControl(gm,movesme,movesopp);
         val+=this.c_developPieces*this.developPieces(gm);
         val+=this.c_kingProtection*this.kingProtection(gm,this.color,move,fen,movesme,movesopp);
@@ -1308,7 +1425,7 @@ function Yavuz(idx,game,color) {
 
                 // if (MEMORY[this.fen]!==undefined) {
                 //     if (MEMORY[this.fen][move]!==undefined) {
-                //         //console.log("move found");
+                //         console.log("move found");
                 //         value+=MEMORY[this.fen][move];
                 //     }
                 // } else {
@@ -1343,7 +1460,7 @@ function Yavuz(idx,game,color) {
                 value=this.midgameEval();
                 return value;
             // }).setOutput([1,1]);
-            // //console.log(tis.game.board());
+            // console.log(tis.game.board());
             // return calc(gm,color);
         },
         getDim:function(a) {
@@ -1360,10 +1477,10 @@ function Yavuz(idx,game,color) {
             return dim;
         },
         selectMove:function(changeDepth=0) {
-            //console.log(changeDepth);
+            console.log(changeDepth);
             // let depth=this.depth+1;
             // let tr=[...this.movetree];
-            // //console.log(this.getDim(tr));
+            // console.log(this.getDim(tr));
             // // let depth=this.depth;
             // while(true) {
             //     this.reduceMoveTreeMaxMin();
@@ -1379,7 +1496,7 @@ function Yavuz(idx,game,color) {
             //     let val = points.reduce(function(a, b) {
             //         return Math.max(a, b);
             //     }, Number.NEGATIVE_INFINITY);
-            //     // //console.log(val);
+            //     // console.log(val);
             //     this.movetree=[];
             //     for(let i=0;i<changeDepth;i++) {
             //         if (this.actualMoves.length>1) {
@@ -1392,16 +1509,16 @@ function Yavuz(idx,game,color) {
             //             break;
             //         }
             //     }
-            //     // //console.log(this.actualMoves.length);
+            //     // console.log(this.actualMoves.length);
             //     if (this.actualMoves.length>=1) return this.actualMoves[points.indexOf(val)];
             //     else 
                 this.calcMoves();
             // }
 
             let treeTemp=[...this.movetree];
-            // //console.log("points length:",treeTemp.length);
+            // console.log("points length:",treeTemp.length);
             this.actualMoves=this.game.moves();
-            // //console.log("moves length:",this.actualMoves.length);
+            // console.log("moves length:",this.actualMoves.length);
             this.actualMoves.forEach((m,idx)=>{
                 // if (m.indexOf("+")!=-1) {
                 //     treeTemp[idx]+=this.checkScore;
@@ -1409,13 +1526,13 @@ function Yavuz(idx,game,color) {
                 //     }
                 if (m.indexOf("#")!=-1) treeTemp[idx]=Number.POSITIVE_INFINITY;
             });
-            // //console.log(tree);
+            // console.log(tree);
             let val = treeTemp.reduce(function(a, b) {
                 return Math.max(a, b);
             }, Number.NEGATIVE_INFINITY);
-            // //console.log(val);
+            // console.log(val);
             this.movetree=[];
-            // //console.log(this.actualMoves);
+            // console.log(this.actualMoves);
             for(let i=0;i<changeDepth;i++) {
                 if (this.actualMoves.length>1) {
                     this.actualMoves.splice(treeTemp.indexOf(val),1);
@@ -1428,9 +1545,9 @@ function Yavuz(idx,game,color) {
                     break;
                 }
             }
-            //console.log(this.actualMoves);
-            //console.log(treeTemp);
-            //console.log(val);
+            console.log(this.actualMoves);
+            console.log(treeTemp);
+            console.log(val);
             return this.actualMoves[treeTemp.indexOf(val)];
         },
         reduceMoveTreeMaxMin: function(depth=this.depth,tree=this.movetree,parent=[this.movetree]) {
@@ -1485,18 +1602,18 @@ function Yavuz(idx,game,color) {
             let moveCount=(this.game.history().length+1)/2;
             let coefmidGame=(1-(moveCount/64));
             let coefendGame=(moveCount/64);
-            // //console.log(this.midgameEval(gm=this.game,color=this.color,move,fen));
-            // //console.log(this.endgameEval(gm=this.game,color=this.color,move,fen));
-            // //console.log(coefEndGame);
-            // //console.log(coefmidGame);
+            // console.log(this.midgameEval(gm=this.game,color=this.color,move,fen));
+            // console.log(this.endgameEval(gm=this.game,color=this.color,move,fen));
+            // console.log(coefEndGame);
+            // console.log(coefmidGame);
             // let kingpoint=this.kingProtection(gm,color,move,fen,movesme,movesopp)*0.01;
-            // //console.log(kingpoint);
+            // console.log(kingpoint);
             // let mat=this.materialandSafety(gm,movesme,movesopp);
-            // //console.log(coefmidGame);
+            // console.log(coefmidGame);
             val+=(coefmidGame*(this.midgameEval(gm,color,move,fen,movesme,movesopp)));
             val+=(coefendGame*(this.endgameEval(gm,color,move,fen,movesme,movesopp)));
             //(coefendGame*this.endgameEval(gm=this.game,color=this.color,move,fen));
-            // //console.log(val);
+            // console.log(val);
             return val;
         },
 
@@ -1561,7 +1678,7 @@ function Yavuz(idx,game,color) {
                     if (m.piece=="k"&&m.from=="e8"&&(m.to=="g8"||m.to=="c8")) val+=(1*this.c_rookandPawnMovement*coefmidGame);
                     this.rookCount++;
                 }
-                // //console.log(hist);
+                // console.log(hist);
                 tempGame.load(f);
                 if (tree.length<idx+1) tree.push(val);
             });
@@ -1585,17 +1702,17 @@ function Yavuz(idx,game,color) {
                     ais[this.game.plb].WINNER=true;
                     ais[this.game.plb].LOSER=false;
                     ais[this.game.plb].DRAW=false;
-                    //console.log("WINNER:",this.game.plb,"GAME:",games.indexOf(this.game));
+                    console.log("WINNER:",this.game.plb,"GAME:",games.indexOf(this.game));
                     document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>BLACK WINS</b>";
                 }
                 if (this.color=="b") {
                     ais[this.game.plw].WINNER=true;
                     ais[this.game.plw].LOSER=false;
                     ais[this.game.plw].DRAW=false;
-                    //console.log("WINNER:",this.game.plw,"GAME:",games.indexOf(this.game));
+                    console.log("WINNER:",this.game.plw,"GAME:",games.indexOf(this.game));
                     document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>WHITE WINS</b>";
                 }
-                //console.log("LOSER:",this.idx,"GAME:",games.indexOf(this.game));
+                console.log("LOSER:",this.idx,"GAME:",games.indexOf(this.game));
                 fin[games.indexOf(this.game)]=true;
                 // if (this.game.isGameOver()) {
                 // this.sendDatatoMemory();
@@ -1618,7 +1735,7 @@ function Yavuz(idx,game,color) {
                     ais[this.game.plw].DRAW=false;
                     document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>BLACK WINS</b>";
                 }
-                //console.log("WINNER:",this.idx,"GAME:",games.indexOf(this.game));
+                console.log("WINNER:",this.idx,"GAME:",games.indexOf(this.game));
                 // document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>WHITE WINS</b>";
                 fin[games.indexOf(this.game)]=true;
                 // this.sendDatatoMemory();
@@ -1639,7 +1756,7 @@ function Yavuz(idx,game,color) {
                     ais[this.game.plw].WINNER=false;
                     ais[this.game.plw].LOSER=false;
                 }
-                //console.log("DRAWN:",this.idx,"GAME:",games.indexOf(this.game));
+                console.log("DRAWN:",this.idx,"GAME:",games.indexOf(this.game));
                 document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="<b>DRAW</b>";
                 fin[games.indexOf(this.game)]=true;
                 // this.sendDatatoMemory();
@@ -1648,23 +1765,27 @@ function Yavuz(idx,game,color) {
 
             } else if (!this.game.isGameOver()&&this.game.turn()==this.color) {
                 // if (MEMORY[this.fen]==undefined) this.calcMoves();
-                // //console.log(this.movetree);
-                // //console.log(this.fen);
+                // console.log(this.movetree);
+                // console.log(this.fen);
                 // let m=this.selectMove(this.fens[this.fen]);
-                // //console.log(Module);
-                //console.log("game index:",games.indexOf(this.game));
+                // console.log(Module);
+                if (this.game.history()[this.game.history().length-1]=="o-o"||this.game.history()[this.game.history().length-1]=="o-o-o")
+                    Module._enemyRooked();
+                if (this.game.history()[this.game.history().length-1]=="O-O"||this.game.history()[this.game.history().length-1]=="O-O-O")
+                    Module._enemyRooked();
+                console.log("game index:",games.indexOf(this.game));
                 let side=0;
                 if (this.color=="b") side=1;
                 Module._set_side(side);
                 Module._set_Coefs(this.ce_passedPawns2,this.ce_pawnWeaknesses,this.ce_pieceActivity,this.ce_kingPawnShield,
                     this.ce_pieceCoordination,this.ce_material,this.c_pieceSquareTables,this.c_mobility,this.c_kingSafety,
-                    this.c_pawnStructure,this.c_pieceCoordination,this.c_material);
-                //console.log("moveCount:",this.game.fen(),Math.ceil(this.game.history().length/2));
+                    this.c_pawnStructure,this.c_pieceCoordination,this.c_material,this.c_rookandPawnMovement, this.c_centerControl,this.c_developPieces,this.ce_kingSafety);
+                console.log("moveCount:",this.game.fen(),Math.ceil(this.game.history().length/2));
                 let m=Module.ccall("selectBest","string",["string","number"],[this.game.fen(),Math.ceil(this.game.history().length/2)]);
-                //console.log(m);
+                console.log(m);
                 let mdata={from:m.substring(0,2),to:m.substring(2,4)};
                 if (m.length==5) mdata.promotion=m.charAt(4);
-                //console.log(m);
+                console.log(m);
                 let x=this.game.move(mdata);
                 // if (this.color=="w") {
                 //     if (m.piece=="k"&&m.from=="e1"&&(m.to=="g1"||m.to=="c1")) this.rookCount++;
@@ -1673,7 +1794,7 @@ function Yavuz(idx,game,color) {
                 //     if (m.piece=="k"&&m.from=="e8"&&(m.to=="g8"||m.to=="c8")) this.rookCount++;
                 // }
                 // // if (m.indexOf("o-o")!=-1) this.rookCount+=1;
-                // // //console.log(this.movetree);
+                // // console.log(this.movetree);
                 // if (m==undefined) {
                 //     this.DRAW=true;
                 //     if (this.color=="w") {
@@ -1684,22 +1805,22 @@ function Yavuz(idx,game,color) {
                 //     }
                 //     fin[games.indexOf(this.game)]=true;
                 //     clearInterval(this.game.thread);
-                //     //console.log("GAME ERROR:",games.indexOf(this.game),"PLAYER:",this.idx);
+                //     console.log("GAME ERROR:",games.indexOf(this.game),"PLAYER:",this.idx);
                 //     document.getElementById("info"+games.indexOf(this.game).toString()).innerHTML="ERROR";
                 // } else {
 
-                //     // //console.log(m);
+                //     // console.log(m);
                 //     // if (m.indexOf("+")!=-1) this.checkScore+=this.checkScoreBase;
                 //     this.memData["fen"+(this.countMoves+1).toString()]=this.game.fen();
-                //     // //console.log(this.game.fen());
+                //     // console.log(this.game.fen());
                 //     this.memData["move"+(this.countMoves+1).toString()]=m;
                 //     this.countMoves++;
                 //     this.game.move(m);
                 //     // if (this.game.isThreefoldRepetition()) {
                 //     //     this.game.undo();
-                //     //     //console.log("move changed:",m);
+                //     //     console.log("move changed:",m);
                 //     //     m=this.selectMove(true);
-                //     //     //console.log("new move",m);
+                //     //     console.log("new move",m);
                 //     //     this.game.move(m);
                 //     // }
                 //     this.types.forEach((type) => {
@@ -1727,7 +1848,7 @@ function Yavuz(idx,game,color) {
                     data: this.memData,
                     dataType: "json",
                     success: function (response,err) {
-                        //console.log(response,err);
+                        console.log(response,err);
                         datasSent[this.idx]=true;
                         this.countMoves=0;
                         this.memData={};
@@ -1789,7 +1910,7 @@ gameProcedures.prototype = {
         //     }
         //     // ids.push(ai.idx);
         // });
-        // // //console.log(this.matchPoints);
+        // // console.log(this.matchPoints);
         // let mpwSorted=[...mpw];
         // let mpbSorted=[...mpb];
         // let eloswSorted=[...elosw];
@@ -1800,7 +1921,7 @@ gameProcedures.prototype = {
         // eloswSorted.sort(function(a, b){return b - a});
         let lst=[...this.ais];
         lst.sort((a,b)=>{return this.matchPoints[b.idx]-this.matchPoints[a.idx]||b.elo-a.elo;});
-        // //console.log(lst);
+        // console.log(lst);
         let mp=[...this.matchPoints];
         mp.sort((a,b)=>{return b-a;});
         let lstfordrawW=[];
@@ -1852,8 +1973,8 @@ gameProcedures.prototype = {
         //     this.ais[p2].color="b";
         //     this.ais[p2].opponent="w";
         //     idsw.splice(index,1);
-        //     //console.log(tableNo,"setted macth");
-        //     //console.log(p1,"vs",p2);
+        //     console.log(tableNo,"setted macth");
+        //     console.log(p1,"vs",p2);
         //     // this.ais[p2].pointsGame=JSON.parse(JSON.stringify(this.ais[p2].points));
         //     // this.ais[p2].inversePoints(this.ais[p2].pointsGame);
         //     // this.ais[p2].opointsGame=JSON.parse(JSON.stringify(this.ais[p2].pointsGame));
@@ -1888,10 +2009,10 @@ gameProcedures.prototype = {
         });
         lstfordrawW=lstfordrawW.flat(Infinity);
         lstfordrawB=lstfordrawB.flat(Infinity);
-        // //console.log(lstfordrawB);
+        // console.log(lstfordrawB);
         for(let i=0;i<size;i++) {
                 this.games[tableNo].reset();
-                // //console.log(i);
+                // console.log(i);
                               
                 let p1=lstfordrawB[i].idx;
                 // lstfordrawB.splice(index,1);
@@ -1911,8 +2032,8 @@ gameProcedures.prototype = {
                 this.ais[p2].color="b";
                 this.ais[p2].opponent="w";
                 // idsw.splice(index,1);
-                //console.log(tableNo,"setted macth");
-                //console.log(p1,"vs",p2);
+                console.log(tableNo,"setted macth");
+                console.log(p1,"vs",p2);
                 tableNo++;
             }
             lstfordrawW=[];
@@ -1932,12 +2053,12 @@ gameProcedures.prototype = {
         });
 
         // let idsTemp=[...this.ids];
-        // //console.log(this.ids);
-        // //console.log(idsTemp);
+        // console.log(this.ids);
+        // console.log(idsTemp);
         let tableNo=0;
         let index=0;
         while(ids.length>0) {//idsw.length>0&&idsb.length>0) {
-            //console.log(tableNo,"setted macth");
+            console.log(tableNo,"setted macth");
             // let index=Math.floor(Math.random()*ids.length);
             this.games[tableNo].reset();
             let p1=ids[index];
@@ -1954,14 +2075,14 @@ gameProcedures.prototype = {
             this.ais[p2].inversePoints(this.ais[p2].points);
             this.ais[p2].opponent="w";
             ids.splice(index2,1);
-            //console.log(p1,"vs",p2);
+            console.log(p1,"vs",p2);
             tableNo++;
         }
     },
     start: function() {
         // ais[games[0].plw].makeMove();
         games.forEach((game,idx)=>{
-            // //console.log("process created",idx);
+            // console.log("process created",idx);
             // clearInterval(game.thread);
             game.thread=setInterval(()=>{
                 ais[game.plw].makeMove();
@@ -1986,9 +2107,9 @@ gameProcedures.prototype = {
         this.drawSwitzerland();
         this.start();
         // this.checkForFinish();
-        //console.log("started...");
-        // //console.log(this.ais[0].points);
-        // //console.log(this.AiProcedures.tour);
+        console.log("started...");
+        // console.log(this.ais[0].points);
+        // console.log(this.AiProcedures.tour);
     },
     
     checkForFinish: function () {
@@ -2006,25 +2127,29 @@ gameProcedures.prototype = {
                         ce_kingPawnShield:ai.ce_kingPawnShield,
                         ce_pieceCoordination:ai.ce_pieceCoordination,
                         ce_material:ai.ce_material,
+                        ce_kingSafety:ai.ce_kingSafety,
                         c_pieceSquareTables:ai.c_pieceSquareTables,
                         c_mobility:ai.c_mobility,
                         c_kingSafety:ai.c_kingSafety,
                         c_pawnStructure:ai.c_pawnStructure,
                         c_pieceCoordination:ai.c_pieceCoordination,
+                        c_rookandPawnMovement:ai.c_pieceCoordination,
+                        c_developPieces:ai.c_developPieces,
+                        c_centerControl:ai.c_centerControl,
                         c_material:ai.c_material,
                         // additionPerMove:JSON.stringify(ai.defaultAdditionPerMove),
                         // pieceAdditionPerMove:JSON.stringify(ai.pieceAdditionPerMove),
                         // checkScore:ai.checkScoreBase,
                         elo:ai.elo
                     };
-                    // //console.log(vals);
+                    // console.log(vals);
                     $.ajax({
                         type: "POST",
                         url: "./saveAi.php",
                         data: vals,
                         dataType: "json",
                         success: function (response) {
-                            //console.log(response);
+                            console.log(response);
                         }
                     });
 
@@ -2038,7 +2163,7 @@ gameProcedures.prototype = {
                     ai.sendData=false;
                     ai.fens={};
                 });
-                //console.log(this.matchPoints);
+                console.log(this.matchPoints);
                 for(let i=0;i<size;i++) {
                     document.getElementById("info"+i.toString()).innerHTML="Game:"+(i+1).toString()
                     fin[i]=false;
@@ -2058,20 +2183,20 @@ gameProcedures.prototype = {
                     if (p==val) rec+=1;
                 });
                 if (rec>1) shouldContinue=true;
-                //console.log(this.AiProcedures.tour,tourCount,shouldContinue);
+                console.log(this.AiProcedures.tour,tourCount,shouldContinue);
                 if (this.AiProcedures.tour<tourCount||shouldContinue||contTournament) {//||contTournament) {
                     this.AiProcedures.mutateModels();
                     this.AiProcedures.crossoverModels();
                     // this.ais.forEach(ai=>{
-                    //     //console.log(ai.c_centerControl);
-                    //     //console.log(ai.c_developPieces);
-                    //     //console.log(ai.c_kingProtection);
-                    //     //console.log(ai.c_materialandSafety);
-                    //     //console.log(ai.c_rookandPawnMovement);
-                    //     //console.log(ai.ce_kingActivity);
-                    //     //console.log(ai.ce_kingProtection);
-                    //     //console.log(ai.ce_materialandSafety);
-                    //     //console.log(ai.ce_passedPawns);
+                    //     console.log(ai.c_centerControl);
+                    //     console.log(ai.c_developPieces);
+                    //     console.log(ai.c_kingProtection);
+                    //     console.log(ai.c_materialandSafety);
+                    //     console.log(ai.c_rookandPawnMovement);
+                    //     console.log(ai.ce_kingActivity);
+                    //     console.log(ai.ce_kingProtection);
+                    //     console.log(ai.ce_materialandSafety);
+                    //     console.log(ai.ce_passedPawns);
                     // });
                     this.drawSwitzerland();
                     // this.draw();
@@ -2089,7 +2214,7 @@ gameProcedures.prototype = {
                         data: data
                       })
                         .done(function( msg ) {
-                          //console.log("Data Saved: " + msg);
+                          console.log("Data Saved: " + msg);
                         });
                         
                     this.start();
