@@ -73,7 +73,7 @@ let ready=false;
     //     // };
     //   };
     Module.onRuntimeInitialized = function() {
-        Module._set_depth(8);
+        Module._set_depth(100);
         //console.log("module loaded...");
     }
     //   //console.log(Module);
