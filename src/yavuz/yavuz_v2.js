@@ -73,7 +73,7 @@ let ready=false;
     //     // };
     //   };
     Module.onRuntimeInitialized = function() {
-        Module._set_depth(5);
+        Module._set_depth(100);
         //console.log("module loaded...");
     }
     //   //console.log(Module);
@@ -85,7 +85,7 @@ var gp;
 let fin=[];
 let datasSent=[];
 let tourCount=Math.floor(Math.log2(40))+1;
-var size=20;
+var size=250;
 for (let i=0;i<size;i++) fin.push(false);
 for (let i=0;i<size;i++) datasSent.push(false);
 // let MEMORY={};
