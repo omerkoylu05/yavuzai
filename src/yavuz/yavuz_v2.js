@@ -73,7 +73,7 @@ let ready=false;
     //     // };
     //   };
     Module.onRuntimeInitialized = function() {
-        Module._set_depth(100);
+        Module._set_depth(6);
         //console.log("module loaded...");
     }
     //   //console.log(Module);
@@ -195,7 +195,7 @@ document.addEventListener('readystatechange', event => {
                 plw.ce_material=parseFloat(ce_material);
                 //console.log(ce_material);
                 plw.ce_kingsafety=parseFloat(ce_kingsafety);
-                ce_pieceSquareTables=parseFloat(ce_pieceSquareTables);
+                plw.ce_pieceSquareTables=parseFloat(ce_pieceSquareTables);
                 //console.log(ce_pieceSquareTables);
 
                 plw.c_mobility=parseFloat(c_mobility);
