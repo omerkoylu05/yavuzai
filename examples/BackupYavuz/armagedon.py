@@ -24,9 +24,12 @@ index2=Points.index(max(PointsTemp))
 PointsTemp.pop(PointsTemp.index(max(PointsTemp)))
 index3=Points.index(max(PointsTemp))
 PointsTemp.pop(PointsTemp.index(max(PointsTemp)))
+index4=Points.index(max(PointsTemp))
+PointsTemp.pop(PointsTemp.index(max(PointsTemp)))
+index5=Points.index(max(PointsTemp))
+PointsTemp.pop(PointsTemp.index(max(PointsTemp)))
 
-
-print(index1,index2,index3)
+print(index1,index2,index3,index4,index5)
 
 
 source_file = str(index1)+".txt"
@@ -41,10 +44,18 @@ source_file = str(index3)+".txt"
 f=open(source_file,"r")
 third=f.readlines()
 f.close()
+source_file = str(index4)+".txt"
+f=open(source_file,"r")
+fourth=f.readlines()
+f.close()
+source_file = str(index5)+".txt"
+f=open(source_file,"r")
+fifth=f.readlines()
+f.close()
 
 destination_folder = "./"
 
-for i in range(10):
+for i in range(49):
     destination_file = f"{i}.txt"
     f=open(destination_folder+destination_file,"w")
     f.writelines(first)
@@ -52,14 +63,26 @@ for i in range(10):
 
 
 
-for i in range(15):
-    destination_file = f"{i+10}.txt"
+for i in range(49):
+    destination_file = f"{i+49}.txt"
     f=open(destination_folder+destination_file,"w")
     f.writelines(second)
     f.close()
 
-for i in range(15):
-    destination_file = f"{i+10+15}.txt"
+for i in range(49):
+    destination_file = f"{i+49+49}.txt"
     f=open(destination_folder+destination_file,"w")
     f.writelines(third)
     f.close()
+
+for i in range(49):
+    destination_file = f"{i+49+49+49}.txt"
+    f=open(destination_folder+destination_file,"w")
+    f.writelines(fourth)
+    f.close()
+
+for i in range(54):
+    destination_file = f"{i+49+49+49}.txt"
+    f=open(destination_folder+destination_file,"w")
+    f.writelines(third)
+    f.close()    
