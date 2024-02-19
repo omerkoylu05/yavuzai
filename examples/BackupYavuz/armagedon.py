@@ -3,7 +3,7 @@ import re
 
 # max=0
 Points=[]
-for i in range(40):
+for i in range(500):
     with open(str(i)+".txt", "r") as file:
         first_line = file.readline().strip()
         match = first_line[4:]
@@ -55,7 +55,7 @@ f.close()
 
 destination_folder = "./"
 
-for i in range(49):
+for i in range(99):
     destination_file = f"{i}.txt"
     f=open(destination_folder+destination_file,"w")
     f.writelines(first)
@@ -63,26 +63,26 @@ for i in range(49):
 
 
 
-for i in range(49):
-    destination_file = f"{i+49}.txt"
+for i in range(99):
+    destination_file = f"{i+99}.txt"
     f=open(destination_folder+destination_file,"w")
     f.writelines(second)
     f.close()
 
-for i in range(49):
-    destination_file = f"{i+49+49}.txt"
+for i in range(99):
+    destination_file = f"{i+99+99}.txt"
     f=open(destination_folder+destination_file,"w")
     f.writelines(third)
     f.close()
 
-for i in range(49):
-    destination_file = f"{i+49+49+49}.txt"
+for i in range(99):
+    destination_file = f"{i+99+99+99}.txt"
     f=open(destination_folder+destination_file,"w")
     f.writelines(fourth)
     f.close()
 
-for i in range(54):
-    destination_file = f"{i+49+49+49}.txt"
+for i in range(104):
+    destination_file = f"{i+99+99+99+99}.txt"
     f=open(destination_folder+destination_file,"w")
-    f.writelines(third)
+    f.writelines(fifth)
     f.close()    
