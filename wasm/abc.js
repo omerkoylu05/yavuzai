@@ -4281,4 +4281,6 @@ var shouldRunNow = true;
 
 if (Module["noInitialRun"]) shouldRunNow = false;
 
+export {Module};
+
 run();
