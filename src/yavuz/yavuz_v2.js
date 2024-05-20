@@ -180,7 +180,9 @@ document.addEventListener('readystatechange', event => {
                 response=response.substr(response.indexOf("C_DEVELOPPIECES"),response.length);
                 let c_developPieces=response.substr(16,response.length-16);
                 response=response.substr(response.indexOf("C_MATERIAL"),response.length);
-                let c_material=response.substr(11,response.length);
+                let c_material=response.substr(11,response.length-11);
+                response=response.substr(response.indexOf("C_MOVECOUNT"),response.length);
+                let c_movecount=response.substr(12,response.length);
                 plw.elo=parseInt(elo);
                 plw.ce_passedPawns2=parseFloat(ce_passedPawns2);
                 //console.log(ce_passedPawns2);
@@ -213,6 +215,7 @@ document.addEventListener('readystatechange', event => {
                 plw.c_developPieces=parseFloat(c_developPieces);
                 //console.log(c_developPieces);
                 plw.c_material=parseFloat(c_material);
+                plw.c_movecount=parseFloat(c_movecount);
                 //console.log(c_material);// plw.defaultPoints=JSON.parse(points);
                 // let opoints={...plw.points};
                 // plw.inversePoints(opoints);
@@ -276,7 +279,9 @@ document.addEventListener('readystatechange', event => {
                 response=response.substr(response.indexOf("C_DEVELOPPIECES"),response.length);
                 let c_developPieces=response.substr(16,response.length-16);
                 response=response.substr(response.indexOf("C_MATERIAL"),response.length);
-                let c_material=response.substr(11,response.length);
+                let c_material=response.substr(11,response.length-11);
+                response=response.substr(response.indexOf("C_MOVECOUNT"),response.length);
+                let c_movecount=response.substr(12,response.length);
                 plb.elo=parseInt(elo);
                 plb.ce_passedPawns2=parseFloat(ce_passedPawns2);
                 //console.log(ce_passedPawns2);
@@ -309,6 +314,7 @@ document.addEventListener('readystatechange', event => {
                 plb.c_developPieces=parseFloat(c_developPieces);
                 //console.log(c_developPieces);
                 plb.c_material=parseFloat(c_material);
+                plb.c_movecount=parseFloat(c_movecount);
                 //console.log(c_material);
 
                 // plb.points=JSON.parse(points);
@@ -645,6 +651,15 @@ AiProcedures.prototype = {
                 angle<0?angle=0.0000000000000001:angle=angle;
                 ai.ce_kingSafety=angle;
             }
+
+            if (Math.random()>0.75) {
+                let angle=this.inverseSigmoid(ai.ce_movecount);
+                angle+=(Math.random()-0.5)*0.1;
+                angle=this.sigmoid(angle);
+                angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
+                angle<0?angle=0.0000000000000001:angle=angle;
+                ai.ce_movecount=angle;
+            }
             // ai.types.forEach((type)=>{
             //     for(let row=0;row<8;row++) {
             //         for(let col=0;col<8;col++) {
@@ -800,6 +815,12 @@ AiProcedures.prototype = {
                         this.ais[idx].ce_kingSafety=this.ais[this.crossoverIds[index+1]].ce_kingSafety;
                         this.ais[this.crossoverIds[index+1]].ce_kingSafety=tmp;
                     }
+
+                    if (Math.random()>0.75) {
+                        tmp=this.ais[idx].ce_movecount;
+                        this.ais[idx].ce_movecount=this.ais[this.crossoverIds[index+1]].ce_movecount;
+                        this.ais[this.crossoverIds[index+1]].ce_movecount=tmp;
+                    }
                     // for (let row=0;row<8;row++) {
                     //     this.ais[idx].types.forEach((type)=>{
                     //         let changeIds=[];
@@ -923,6 +944,8 @@ function Yavuz(idx,game,color) {
             this.c_centerControl=0.5;
             this.c_developPieces=0.5;
             this.c_pieceCoordination=0.5;
+            this.c_movecount=0.5;
+            
 
             
             this.types.forEach((type)=>{
@@ -1779,7 +1802,7 @@ function Yavuz(idx,game,color) {
                 Module._set_side(side);
                 Module._set_Coefs(this.ce_passedPawns2,this.ce_pawnWeaknesses,this.ce_pieceActivity,this.ce_kingPawnShield,
                     this.ce_pieceCoordination,this.ce_material,this.c_pieceSquareTables,this.c_mobility,this.c_kingSafety,
-                    this.c_pawnStructure,this.c_pieceCoordination,this.c_material,this.c_rookandPawnMovement, this.c_centerControl,this.c_developPieces,this.ce_kingSafety);
+                    this.c_pawnStructure,this.c_pieceCoordination,this.c_material,this.c_rookandPawnMovement, this.c_centerControl,this.c_developPieces,this.ce_kingSafety,this.c_movecount);
                 //console.log("moveCount:",this.game.fen(),Math.ceil(this.game.history().length/2));
                 let m=Module.ccall("selectBest","string",["string","number"],[this.game.fen(),Math.ceil(this.game.history().length/2)]);
                 //console.log(m);
@@ -2137,6 +2160,7 @@ gameProcedures.prototype = {
                         c_developPieces:ai.c_developPieces,
                         c_centerControl:ai.c_centerControl,
                         c_material:ai.c_material,
+                        c_movecount:ai.c_movecount,
                         // additionPerMove:JSON.stringify(ai.defaultAdditionPerMove),
                         // pieceAdditionPerMove:JSON.stringify(ai.pieceAdditionPerMove),
                         // checkScore:ai.checkScoreBase,

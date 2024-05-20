@@ -25,6 +25,7 @@ if (!empty($_POST)) {
     $c_centerControl=$_POST["c_centerControl"];
     $c_developPieces=$_POST["c_developPieces"];
     $c_material=$_POST["c_material"];
+    $c_movecount=$_POST["c_movecount"];
 
     $file=fopen("./BackupYavuz/".$id.".txt","w");
     fwrite($file,"ELO:".$elo."\n");
@@ -44,6 +45,7 @@ if (!empty($_POST)) {
     fwrite($file,"C_CENTERCONTROL:".$c_centerControl."\n");
     fwrite($file,"C_DEVELOPPIECES:".$c_developPieces."\n");
     fwrite($file,"C_MATERIAL:".$c_material."\n");
+    fwrite($file,"C_MOVECOUNT:".$c_movecount."\n");
     
     fclose($file);
     $response="OK";
