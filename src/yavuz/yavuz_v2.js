@@ -653,12 +653,12 @@ AiProcedures.prototype = {
             }
 
             if (Math.random()>0.75) {
-                let angle=this.inverseSigmoid(ai.ce_movecount);
+                let angle=this.inverseSigmoid(ai.c_movecount);
                 angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
-                ai.ce_movecount=angle;
+                ai.c_movecount=angle;
             }
             // ai.types.forEach((type)=>{
             //     for(let row=0;row<8;row++) {
@@ -817,9 +817,9 @@ AiProcedures.prototype = {
                     }
 
                     if (Math.random()>0.75) {
-                        tmp=this.ais[idx].ce_movecount;
-                        this.ais[idx].ce_movecount=this.ais[this.crossoverIds[index+1]].ce_movecount;
-                        this.ais[this.crossoverIds[index+1]].ce_movecount=tmp;
+                        tmp=this.ais[idx].c_movecount;
+                        this.ais[idx].c_movecount=this.ais[this.crossoverIds[index+1]].c_movecount;
+                        this.ais[this.crossoverIds[index+1]].c_movecount=tmp;
                     }
                     // for (let row=0;row<8;row++) {
                     //     this.ais[idx].types.forEach((type)=>{
