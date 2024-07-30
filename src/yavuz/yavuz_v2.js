@@ -1,6 +1,6 @@
 import {Chessboard,COLOR, PIECE} from "../cm-chessboard/Chessboard.js";
 import {Chess} from "../../node_modules/chess.js/dist/esm/chess.js";
-import {Module} from "../../wasm/abc.js";
+import {Module} from "../../wasm/output.js";
 // import { $ } from "../../node_modules/jquery/dist/jquery.js";
 // import * as $  from "../../node_modules/jquery/dist/jquery.min.js";
 let MEMORY={};
@@ -73,7 +73,7 @@ let ready=false;
     //     // };
     //   };
     Module.onRuntimeInitialized = function() {
-        Module._set_depth(12);
+        Module._set_depth(3);
         //console.log("module loaded...");
     }
     //   //console.log(Module);
