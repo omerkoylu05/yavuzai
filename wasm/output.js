@@ -2393,8 +2393,9 @@ if (Module['noInitialRun']) shouldRunNow = false;
 
 export {Module};
 
-
 run();
+
+
 
 
 // end include: postamble.js
