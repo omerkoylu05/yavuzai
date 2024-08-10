@@ -1951,6 +1951,7 @@ var _setByte = Module['_setByte'] = createExportWrapper('setByte');
 var _getByte = Module['_getByte'] = createExportWrapper('getByte');
 var _selectBest = Module['_selectBest'] = createExportWrapper('selectBest');
 var _deleteRes = Module['_deleteRes'] = createExportWrapper('deleteRes');
+var _enemyRooked = Module['_enemyRooked'] = createExportWrapper('enemyRooked');
 var _main = Module['_main'] = createExportWrapper('main');
 var ___errno_location = createExportWrapper('__errno_location');
 var _fflush = Module['_fflush'] = createExportWrapper('fflush');
@@ -2394,8 +2395,6 @@ if (Module['noInitialRun']) shouldRunNow = false;
 export {Module};
 
 run();
-
-
 
 
 // end include: postamble.js
