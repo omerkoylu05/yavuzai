@@ -21,11 +21,15 @@ if (!empty($_POST)) {
     $c_pieceSquareTables=$_POST["c_pieceSquareTables"];
     $c_pawnStructure=$_POST["c_pawnStructure"];
     $c_pieceCoordination=$_POST["c_pieceCoordination"];
-    $c_rookandPawnMovement=$_POST["c_rookandPawnMovement"];
+    // $c_rookandPawnMovement=$_POST["c_rookandPawnMovement"];
     $c_centerControl=$_POST["c_centerControl"];
     $c_developPieces=$_POST["c_developPieces"];
     $c_material=$_POST["c_material"];
     $c_movecount=$_POST["c_movecount"];
+    $c_rook=$_POST["c_rook"];
+    $ce_rook=$_POST["ce_rook"];
+    $c_pawnmovement=$_POST["c_pawnmovement"];
+
 
     $file=fopen("./BackupYavuz/".$id.".txt","w");
     fwrite($file,"ELO:".$elo."\n");
@@ -41,11 +45,13 @@ if (!empty($_POST)) {
     fwrite($file,"C_KINGSAFETY:".$c_kingSafety."\n");
     fwrite($file,"C_PAWNSTRUCTURE:".$c_pawnStructure."\n");
     fwrite($file,"C_PIECECOORDINATION:".$c_pieceCoordination."\n");
-    fwrite($file,"C_ROOKANDPAWNMOVEMENT:".$c_rookandPawnMovement."\n");
+    fwrite($file,"C_ROOK:".$c_rook."\n");
+    fwrite($file,"CE_ROOK:".$ce_rook."\n");
     fwrite($file,"C_CENTERCONTROL:".$c_centerControl."\n");
     fwrite($file,"C_DEVELOPPIECES:".$c_developPieces."\n");
     fwrite($file,"C_MATERIAL:".$c_material."\n");
     fwrite($file,"C_MOVECOUNT:".$c_movecount."\n");
+    fwrite($file,"C_PAWNMOVEMENT:".$c_pawnmovement."\n");
     
     fclose($file);
     $response="OK";

@@ -173,8 +173,10 @@ document.addEventListener('readystatechange', event => {
                 let c_pawnStructure=response.substr(16,response.indexOf("\n")-16);
                 response=response.substr(response.indexOf("C_PIECECOORDINATION"),response.length);
                 let c_pieceCoordination=response.substr(20,response.length-20);
-                response=response.substr(response.indexOf("C_ROOKANDPAWNMOVEMENT"),response.length);
-                let c_rookandPawnMovement=response.substr(22,response.length-22);
+                response=response.substr(response.indexOf("C_ROOK"),response.length);
+                let c_rook=response.substr(7,response.length-7);
+                response=response.substr(response.indexOf("CE_ROOK"),response.length);
+                let ce_rook=response.substr(8,response.length-8);
                 response=response.substr(response.indexOf("C_CENTERCONTROL"),response.length);
                 let c_centerControl=response.substr(16,response.length-16);
                 response=response.substr(response.indexOf("C_DEVELOPPIECES"),response.length);
@@ -182,7 +184,9 @@ document.addEventListener('readystatechange', event => {
                 response=response.substr(response.indexOf("C_MATERIAL"),response.length);
                 let c_material=response.substr(11,response.length-11);
                 response=response.substr(response.indexOf("C_MOVECOUNT"),response.length);
-                let c_movecount=response.substr(12,response.length);
+                let c_movecount=response.substr(12,response.length-12);
+                response=response.substr(response.indexOf("C_PAWNMOVEMENT"),response.length);
+                let c_pawnmovement=response.substr(15,response.length);
                 plw.elo=parseInt(elo);
                 plw.ce_passedPawns2=parseFloat(ce_passedPawns2);
                 //console.log(ce_passedPawns2);
@@ -208,7 +212,9 @@ document.addEventListener('readystatechange', event => {
                 //console.log(c_pawnStructure);
                 plw.c_pieceCoordination=parseFloat(c_pieceCoordination);
                 //console.log(ce_pieceCoordination);
-                plw.c_rookandPawnMovement=parseFloat(c_rookandPawnMovement);
+                plw.c_rook=parseFloat(c_rook);
+                plw.ce_rook=parseFloat(ce_rook);
+
                 //console.log(c_rookandPawnMovement);
                 plw.c_centerControl=parseFloat(c_centerControl);
                 //console.log(c_centerControl);
@@ -216,6 +222,7 @@ document.addEventListener('readystatechange', event => {
                 //console.log(c_developPieces);
                 plw.c_material=parseFloat(c_material);
                 plw.c_movecount=parseFloat(c_movecount);
+                plw.c_pawnmovement=parseFloat(c_pawnmovement);
                 //console.log(c_material);// plw.defaultPoints=JSON.parse(points);
                 // let opoints={...plw.points};
                 // plw.inversePoints(opoints);
@@ -272,8 +279,10 @@ document.addEventListener('readystatechange', event => {
                 let c_pawnStructure=response.substr(16,response.indexOf("\n")-16);
                 response=response.substr(response.indexOf("C_PIECECOORDINATION"),response.length);
                 let c_pieceCoordination=response.substr(20,response.length-20);
-                response=response.substr(response.indexOf("C_ROOKANDPAWNMOVEMENT"),response.length);
-                let c_rookandPawnMovement=response.substr(22,response.length-22);
+                response=response.substr(response.indexOf("C_ROOK"),response.length);
+                let c_rook=response.substr(7,response.length-7);
+                response=response.substr(response.indexOf("CE_ROOK"),response.length);
+                let ce_rook=response.substr(8,response.length-8);
                 response=response.substr(response.indexOf("C_CENTERCONTROL"),response.length);
                 let c_centerControl=response.substr(16,response.length-16);
                 response=response.substr(response.indexOf("C_DEVELOPPIECES"),response.length);
@@ -281,7 +290,9 @@ document.addEventListener('readystatechange', event => {
                 response=response.substr(response.indexOf("C_MATERIAL"),response.length);
                 let c_material=response.substr(11,response.length-11);
                 response=response.substr(response.indexOf("C_MOVECOUNT"),response.length);
-                let c_movecount=response.substr(12,response.length);
+                let c_movecount=response.substr(12,response.length-12);
+                response=response.substr(response.indexOf("C_PAWNMOVEMENT"),response.length);
+                let c_pawnmovement=response.substr(15,response.length);
                 plb.elo=parseInt(elo);
                 plb.ce_passedPawns2=parseFloat(ce_passedPawns2);
                 //console.log(ce_passedPawns2);
@@ -307,7 +318,8 @@ document.addEventListener('readystatechange', event => {
                 //console.log(c_pawnStructure);
                 plb.c_pieceCoordination=parseFloat(c_pieceCoordination);
                 //console.log(ce_pieceCoordination);
-                plb.c_rookandPawnMovement=parseFloat(c_rookandPawnMovement);
+                plb.c_rook=parseFloat(c_rook);
+                plb.ce_rook=parseFloat(ce_rook);
                 //console.log(c_rookandPawnMovement);
                 plb.c_centerControl=parseFloat(c_centerControl);
                 //console.log(c_centerControl);
@@ -315,6 +327,7 @@ document.addEventListener('readystatechange', event => {
                 //console.log(c_developPieces);
                 plb.c_material=parseFloat(c_material);
                 plb.c_movecount=parseFloat(c_movecount);
+                plb.c_pawnmovement=parseFloat(c_pawnmovement);
                 //console.log(c_material);
 
                 // plb.points=JSON.parse(points);
@@ -940,11 +953,14 @@ function Yavuz(idx,game,color) {
             this.c_mobility=0.5;
             this.c_kingSafety=0.5;
             this.c_pawnStructure=0.5;
-            this.c_rookandPawnMovement=0.5;
+            // this.c_rookandPawnMovement=0.5;
             this.c_centerControl=0.5;
             this.c_developPieces=0.5;
             this.c_pieceCoordination=0.5;
             this.c_movecount=0.5;
+            this.c_rook=0.5;
+            this.ce_rook=0.5;
+            this.c_pawnmovement=0.5;
             
 
             
@@ -1802,7 +1818,7 @@ function Yavuz(idx,game,color) {
                 Module._set_side(side);
                 Module._set_Coefs(this.ce_passedPawns2,this.ce_pawnWeaknesses,this.ce_pieceActivity,this.ce_kingPawnShield,
                     this.ce_pieceCoordination,this.ce_material,this.c_pieceSquareTables,this.c_mobility,this.c_kingSafety,
-                    this.c_pawnStructure,this.c_pieceCoordination,this.c_material,this.c_rookandPawnMovement, this.c_centerControl,this.c_developPieces,this.ce_kingSafety,this.c_movecount);
+                    this.c_pawnStructure,this.c_pieceCoordination,this.c_material,this.c_rook, this.c_centerControl,this.c_developPieces,this.ce_kingSafety,this.c_movecount, this.ce_rook, this.c_pawnmovement);
                 //console.log("moveCount:",this.game.fen(),Math.ceil(this.game.history().length/2));
                 let m=Module.ccall("selectBest","string",["string","number"],[this.game.fen(),Math.ceil(this.game.history().length/2)]);
                 //console.log(m);
@@ -2156,11 +2172,13 @@ gameProcedures.prototype = {
                         c_kingSafety:ai.c_kingSafety,
                         c_pawnStructure:ai.c_pawnStructure,
                         c_pieceCoordination:ai.c_pieceCoordination,
-                        c_rookandPawnMovement:ai.c_pieceCoordination,
+                        c_rook:ai.c_rook,
                         c_developPieces:ai.c_developPieces,
                         c_centerControl:ai.c_centerControl,
                         c_material:ai.c_material,
                         c_movecount:ai.c_movecount,
+                        c_pawnmovement:ai.c_pawnmovement,
+                        ce_rook:ai.ce_rook,
                         // additionPerMove:JSON.stringify(ai.defaultAdditionPerMove),
                         // pieceAdditionPerMove:JSON.stringify(ai.pieceAdditionPerMove),
                         // checkScore:ai.checkScoreBase,
