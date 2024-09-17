@@ -621,12 +621,21 @@ AiProcedures.prototype = {
             }
 
             if (Math.random()>0.75) {
-                let angle=this.inverseSigmoid(ai.c_rookandPawnMovement);
+                let angle=this.inverseSigmoid(ai.c_rook);
                 angle+=(Math.random()-0.5)*0.1;
                 angle=this.sigmoid(angle);
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
-                ai.c_rookandPawnMovement=angle;
+                ai.c_rook=angle;
+            }
+
+            if (Math.random()>0.75) {
+                let angle=this.inverseSigmoid(ai.ce_rook);
+                angle+=(Math.random()-0.5)*0.1;
+                angle=this.sigmoid(angle);
+                angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
+                angle<0?angle=0.0000000000000001:angle=angle;
+                ai.ce_rook=angle;
             }
 
             if (Math.random()>0.75) {
@@ -636,6 +645,15 @@ AiProcedures.prototype = {
                 angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
                 angle<0?angle=0.0000000000000001:angle=angle;
                 ai.c_centerControl=angle;
+            }
+
+            if (Math.random()>0.75) {
+                let angle=this.inverseSigmoid(ai.c_pawnmovement);
+                angle+=(Math.random()-0.5)*0.1;
+                angle=this.sigmoid(angle);
+                angle>0.9999999999999999?angle=0.9999999999999999:angle=angle;
+                angle<0?angle=0.0000000000000001:angle=angle;
+                ai.c_pawnmovement=angle;
             }
 
             if (Math.random()>0.75) {
@@ -800,9 +818,21 @@ AiProcedures.prototype = {
                     }
 
                     if (Math.random()>0.75) {
-                        tmp=this.ais[idx].c_rookandPawnMovement;
-                        this.ais[idx].c_rookandPawnMovement=this.ais[this.crossoverIds[index+1]].c_rookandPawnMovement;
-                        this.ais[this.crossoverIds[index+1]].c_rookandPawnMovement=tmp;
+                        tmp=this.ais[idx].c_rook;
+                        this.ais[idx].c_rook=this.ais[this.crossoverIds[index+1]].c_rook;
+                        this.ais[this.crossoverIds[index+1]].c_rook=tmp;
+                    }
+
+                    if (Math.random()>0.75) {
+                        tmp=this.ais[idx].ce_rook;
+                        this.ais[idx].ce_rook=this.ais[this.crossoverIds[index+1]].ce_rook;
+                        this.ais[this.crossoverIds[index+1]].ce_rook=tmp;
+                    }
+
+                    if (Math.random()>0.75) {
+                        tmp=this.ais[idx].c_pawnmovement;
+                        this.ais[idx].c_pawnmovement=this.ais[this.crossoverIds[index+1]].c_pawnmovement;
+                        this.ais[this.crossoverIds[index+1]].c_pawnmovement=tmp;
                     }
 
                     if (Math.random()>0.75) {
