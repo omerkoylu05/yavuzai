@@ -1989,9 +1989,10 @@ gameProcedures.prototype = {
         // elosbSorted.sort(function(a, b){return b - a});
         // eloswSorted.sort(function(a, b){return b - a});
         let lst=[...this.ais];
-        lst.sort((a,b)=>{return this.matchPoints[b.idx]-this.matchPoints[a.idx]||b.elo-a.elo;});
+        lst.sort((a,b)=>{return b.elo-a.elo});//this.matchPoints[b.idx]-this.matchPoints[a.idx]||b.elo-a.elo;});
         // //console.log(lst);
-        let mp=[...this.matchPoints];
+        let mp=lst.filter(value=>value.elo);
+        // let mp=[...this.matchPoints];
         mp.sort((a,b)=>{return b-a;});
         let lstfordrawW=[];
         let lstfordrawB=[];
@@ -2063,7 +2064,8 @@ gameProcedures.prototype = {
         //     tableNo++;
         // }
         let index=0;
-        lstfordrawW.sort((a,b)=>{return a.elo-b.elo||a.mp-b.mp});
+        lstfordrawW.sort((a,b)=>{return a.elo-b.elo});
+        lstfordrawB.sort((a,b)=>{return a.elo-b.elo});
         lstfordrawW.forEach((item,i)=>{
             if (item.length%2!=0) {
                 lstfordrawW[i+1].unshift(item[item.length-1]);
@@ -2109,6 +2111,121 @@ gameProcedures.prototype = {
             lstfordrawB=[];
     },
     
+    drawByEloGroups: function() {
+        let lst = [...this.ais];
+        // Önce modelleri Elo ve maç puanlarına göre sıralıyoruz
+        lst.sort((a, b) => {
+            return this.matchPoints[b.idx] - this.matchPoints[a.idx] || b.elo - a.elo;
+        });
+    
+        // Toplam model sayısı (500 model)
+        let totalModels = lst.length;
+        let top10 = Math.floor(totalModels * 0.10); // %10 = 50 model
+        let upperMid30 = Math.floor(totalModels * 0.30); // %30 = 150 model
+        let lowerMid30 = Math.floor(totalModels * 0.30); // %30 = 150 model
+        let bottom30 = totalModels - (top10 + upperMid30 + lowerMid30); // Kalan alt %30 = 150 model
+    
+        // Grupları belirleme
+        let top10Group = lst.slice(0, top10);
+        // console.log(top10Group);
+        let upperMidGroup = lst.slice(top10, top10 + upperMid30);
+        let lowerMidGroup = lst.slice(top10 + upperMid30, top10 + upperMid30 + lowerMid30);
+        let bottom30Group = lst.slice(top10 + upperMid30 + lowerMid30, top10 + upperMid30 + lowerMid30+bottom30);
+    
+        let matchups = [];
+        let tableNo = 0;
+        let matchedModels=[];
+        // Eşleşme fonksiyonu: grup içi ve gruplar arası eşleşmeler
+        function createGroupMatchups(groupA, groupB, percentageA, percentageB) {
+            let matchGroupA = groupA.slice(0, Math.floor(groupA.length * percentageA));
+            let matchGroupB = groupB.slice(0, Math.floor(groupB.length * percentageB));
+    
+            // Grup A ve Grup B'deki eşleşme sayısının aynı olmasını sağlama
+            let minLength = Math.min(matchGroupA.length, matchGroupB.length);
+            matchGroupA = matchGroupA.slice(0, minLength);
+            matchGroupB = matchGroupB.slice(0, minLength);
+    
+            return matchGroupA.map((modelA, i) => {
+                let modelB = matchGroupB[i];
+                matchedModels.push(modelA.idx);
+                matchedModels.push(modelB.idx);
+                return { modelA, modelB };
+            });
+        }
+
+        for (let index = 0; index < size; index++) {
+            if (matchedModels.indexOf(index)!=-1) {
+                console.log(index, "eşleşmemiş");
+            } else {
+                continue;
+            }
+            
+        }
+    
+        // Gruplar arasında eşleşmeler
+        let matchesTop10UpperMid = createGroupMatchups(top10Group, upperMidGroup, 0.60, 0.40);
+        console.log(matchesTop10UpperMid.length);
+        let matchesUpperMidLowerMid = createGroupMatchups(upperMidGroup, lowerMidGroup, 0.50, 0.20);
+        console.log(matchesUpperMidLowerMid.length);
+        let matchesLowerMidBottom = createGroupMatchups(lowerMidGroup, bottom30Group, 0.50, 0.40);
+        console.log(matchesLowerMidBottom.length);
+    
+        // Her grup kendi içindeki eşleşmeler
+        function matchWithinGroup(group, percentage) {
+            let matches = [];
+            let matchGroup = group.slice(0, Math.floor(group.length * percentage));
+    
+            // Eğer eşleşecek çift kalmazsa, tek oyuncuyu bir sonraki gruba taşı
+            if (matchGroup.length % 2 !== 0) {
+                matchGroup.pop();  // Son oyuncuyu çıkarıyoruz
+            }
+    
+            for (let i = 0; i < matchGroup.length - 1; i += 2) {
+                matches.push({ modelA: matchGroup[i], modelB: matchGroup[i + 1] });
+            }
+            return matches;
+        }
+    
+        let matchesTop10 = matchWithinGroup(top10Group, 0.60);
+        console.log(matchesTop10.length);
+        let matchesUpperMid = matchWithinGroup(upperMidGroup, 0.50);
+        console.log(matchesUpperMid.length);
+        let matchesLowerMid = matchWithinGroup(lowerMidGroup, 0.50);
+        console.log(matchesLowerMid.length);
+        let matchesBottom = matchWithinGroup(bottom30Group, 0.60);
+        console.log(matchesBottom.length);
+    
+        // Tüm eşleşmeleri birleştiriyoruz
+        matchups = [...matchesTop10UpperMid, ...matchesUpperMidLowerMid, ...matchesLowerMidBottom, ...matchesTop10, ...matchesUpperMid, ...matchesLowerMid, ...matchesBottom];
+    
+        // Eğer fazla eşleşme varsa, fazla olanları siliyoruz
+        if (matchups.length > totalModels / 2) {
+            matchups = matchups.slice(0, totalModels / 2);
+        }
+    
+        // Eşleşmeleri tabloya atama
+        // console.log(matchups);
+        
+        matchups.forEach(match => {
+            this.games[tableNo].reset();
+            let p1 = match.modelA.idx;
+            this.games[tableNo].plw = p1;
+            this.ais[p1].game = this.games[tableNo];
+            this.ais[p1].color = "w";
+            this.ais[p1].opponent = "b";
+            
+            let p2 = match.modelB.idx;
+            this.games[tableNo].plb = p2;
+            this.ais[p2].game = this.games[tableNo];
+            this.ais[p2].color = "b";
+            this.ais[p2].opponent = "w";
+            
+            tableNo++;
+        });
+    },
+    
+    
+    
     draw:function() {
         // let idsb=[];
         // let idsw=[];
@@ -2150,7 +2267,7 @@ gameProcedures.prototype = {
     },
     start: function() {
         // ais[games[0].plw].makeMove();
-        games.forEach((game,idx)=>{
+        this.games.forEach((game,idx)=>{
             // //console.log("process created",idx);
             // clearInterval(game.thread);
             game.thread=setInterval(()=>{
@@ -2173,6 +2290,7 @@ gameProcedures.prototype = {
     },
 
     run: function() {
+        // this.drawByEloGroups();
         this.drawSwitzerland();
         this.start();
         // this.checkForFinish();
@@ -2270,6 +2388,7 @@ gameProcedures.prototype = {
                     //     //console.log(ai.ce_materialandSafety);
                     //     //console.log(ai.ce_passedPawns);
                     // });
+                    // this.drawByEloGroups();
                     this.drawSwitzerland();
                     // this.draw();
                     let data={};
