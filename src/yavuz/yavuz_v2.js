@@ -2013,7 +2013,7 @@ gameProcedures.prototype = {
             }
             if (x==lastX) {
                 lst[i].mp=x;
-                lst[i].color=="w"?tempW.push(lst[i]):tempB.push(lst[i]);
+                lst[i].color=="b"?tempW.push(lst[i]):tempB.push(lst[i]);
             }
             if (i==mp.length-1) {
                 lstfordrawW.push(tempW);
@@ -2086,6 +2086,7 @@ gameProcedures.prototype = {
                 // //console.log(i);
                               
                 let p1=lstfordrawB[i].idx;
+                // console.log(p1);
                 // lstfordrawB.splice(index,1);
                 this.games[tableNo].plw=p1;
                 this.ais[p1].game=this.games[tableNo];
@@ -2097,6 +2098,7 @@ gameProcedures.prototype = {
                 // mpw.splice(index,1);
                 // mpwSorted.splice(0,1);
                 let p2=lstfordrawW[i].idx;
+                // console.log(p2);
                 // lstfordrawW.splice(i,1);
                 this.games[tableNo].plb=p2;
                 this.ais[p2].game=this.games[tableNo];
